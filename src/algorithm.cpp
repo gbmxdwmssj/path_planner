@@ -70,8 +70,10 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
 
   // float max = 0.f;
 
+  long int loop_cnt = 0;
   // continue until O empty
-  while (!O.empty()) {
+  while (!O.empty() && ros::ok()) {
+    loop_cnt++;
 
     //    // DEBUG
     //    Node3D* pre = nullptr;
@@ -154,6 +156,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
       // _________
       // GOAL TEST
       if (*nPred == goal || iterations > Constants::iterations) {
+        printf("[Reach goal or exceed maximal iterations] Number of expanded nodes: %ld\n", loop_cnt);
         // DEBUG
         return nPred;
       }
@@ -167,6 +170,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
           nSucc = dubinsShot(*nPred, goal, configurationSpace);
 
           if (nSucc != nullptr && *nSucc == goal) {
+            printf("[Dubins shot success] Number of expanded nodes: %ld\n", loop_cnt);
             //DEBUG
             // std::cout << "max diff " << max << std::endl;
             return nSucc;
@@ -223,6 +227,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
       }
     }
   }
+  printf("[Open list is empty] Number of expanded nodes: %ld\n", loop_cnt);
 
   if (O.empty()) {
     return nullptr;

@@ -1,2 +1,3 @@
-collision detection: if 0 <= occ_value <= threshold, then free, otherwise occupied
+collision detection: if 0 <= occ_value <= occ_thre, then free, otherwise occupied
 updateG: plus zero/weighted-traversability/weighted-random-traversability
+in weighted-(random-)traversability: how to solve dubin shots

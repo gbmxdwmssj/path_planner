@@ -5,6 +5,9 @@ using namespace HybridAStar;
 //                                        CONSTRUCTOR
 //###################################################
 Planner::Planner() {
+  int thre = 99;
+  n.getParam("/hybrid_astar/occ_thre", thre);
+  configurationSpace.setOccThre(thre);
   // _____
   // TODOS
   //    initializeLookups();

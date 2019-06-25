@@ -5,6 +5,6 @@
  </node>
 
  <node name="tf_broadcaster" pkg="hybrid_astar" type="tf_broadcaster" />
- <node name="occupancy_server" pkg="grid_map_demos" type="occupancy_server.py" args="$(find hybrid_astar)/maps/occ-map-2019-06-25-17:22:14.yaml" />
+ <node name="map_server" pkg="map_server" type="map_server" args="$(find hybrid_astar)/maps/map.yaml" />
  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_astar)/launch/config.rviz" />
 </launch>

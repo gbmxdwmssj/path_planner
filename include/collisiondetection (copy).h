@@ -52,8 +52,7 @@ class CollisionDetection {
 
     // 2D collision test
     if (t == 99) {
-      // return !grid->data[node->getIdx()]; // if non-zero, then not traversable
-      return (grid->data[node->getIdx()] >= 0 && grid->data[node->getIdx()] <= occ_thre); // if in the range, then free (is traversable)
+      return !grid->data[node->getIdx()]; // if non-zero, then not traversable
     }
 
     if (true) {

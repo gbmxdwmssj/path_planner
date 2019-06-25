@@ -3,8 +3,7 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Global Options1
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 775
   - Class: rviz/Selection
@@ -47,7 +46,7 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: false
-    - Alpha: 0.699999988
+    - Alpha: 1
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
@@ -63,11 +62,11 @@ Visualization Manager:
       Class: rviz/Pose
       Color: 0; 255; 0
       Enabled: true
-      Head Length: 0.300000012
-      Head Radius: 0.100000001
-      Name: Pose
+      Head Length: 1.5
+      Head Radius: 0.5
+      Name: Goal
       Shaft Length: 1
-      Shaft Radius: 0.0500000007
+      Shaft Radius: 0.25
       Shape: Arrow
       Topic: /move_base_simple/goal
       Unreliable: false
@@ -78,11 +77,11 @@ Visualization Manager:
       Class: rviz/Pose
       Color: 255; 25; 0
       Enabled: true
-      Head Length: 0.300000012
-      Head Radius: 0.100000001
-      Name: Pose
+      Head Length: 1.5
+      Head Radius: 0.5
+      Name: Start
       Shaft Length: 1
-      Shaft Radius: 0.0500000007
+      Shaft Radius: 0.25
       Shape: Arrow
       Topic: /move_base_simple/start
       Unreliable: false
@@ -205,7 +204,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 5.96046448e-08
+      Angle: -2.98023224e-08
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
@@ -215,11 +214,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 11.3518276
+      Scale: 3.16149449
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 42.9505501
-      Y: 39.6593056
+      X: 124.456306
+      Y: 122.392372
     Saved: ~
 Window Geometry:
   Displays:
