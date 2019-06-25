@@ -1,0 +1,2 @@
+collision detection: if 0 <= occ_value <= threshold, then free, otherwise occupied
+updateG: plus zero/weighted-traversability/weighted-random-traversability
