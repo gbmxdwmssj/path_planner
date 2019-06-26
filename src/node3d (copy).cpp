@@ -70,105 +70,33 @@ Node3D* Node3D::createSuccessor(const int i) {
 //###################################################
 //                                      MOVEMENT COST
 //###################################################
-void Node3D::updateG(int cost_mode, nav_msgs::OccupancyGrid::Ptr grid, double dis_wei, double occ_wei) {
-  if (cost_mode == 0) { /****************** zero ******************/
-    // forward driving
-    if (prim < 3) {
-      // penalize turning
-      if (pred->prim != prim) {
-        // penalize change of direction
-        if (pred->prim > 2) {
-          g += dx[0] * Constants::penaltyTurning * Constants::penaltyCOD;
-        } else {
-          g += dx[0] * Constants::penaltyTurning;
-        }
+void Node3D::updateG() {
+  // forward driving
+  if (prim < 3) {
+    // penalize turning
+    if (pred->prim != prim) {
+      // penalize change of direction
+      if (pred->prim > 2) {
+        g += dx[0] * Constants::penaltyTurning * Constants::penaltyCOD;
       } else {
-        g += dx[0];
+        g += dx[0] * Constants::penaltyTurning;
       }
+    } else {
+      g += dx[0];
     }
-    // reverse driving
-    else {
-      // penalize turning and reversing
-      if (pred->prim != prim) {
-        // penalize change of direction
-        if (pred->prim < 3) {
-          g += dx[0] * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD;
-        } else {
-          g += dx[0] * Constants::penaltyTurning * Constants::penaltyReversing;
-        }
+  }
+  // reverse driving
+  else {
+    // penalize turning and reversing
+    if (pred->prim != prim) {
+      // penalize change of direction
+      if (pred->prim < 3) {
+        g += dx[0] * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD;
       } else {
-        g += dx[0] * Constants::penaltyReversing;
+        g += dx[0] * Constants::penaltyTurning * Constants::penaltyReversing;
       }
-    }
-  } else if (cost_mode == 1) { /****************** weighted-random-traversability ******************/
-    int X = (int)(x + 0.5);
-    int Y = (int)(y + 0.5);
-    int occ = grid->data[Y * grid->info.width + X]; // occ_value $\in$ [0, 100]
-    double normal_occ = dx[0] * (occ - 0.0) / (100.0 - 0.0);
-    double wei_normal_occ = occ_wei * normal_occ;
-    double rand_num = 1.0 + (0.3 * rand() / RAND_MAX); // [1.0, 1.3]
-    double rand_wei_normal_occ = rand_num * wei_normal_occ;
-    // forward driving
-    if (prim < 3) {
-      // penalize turning
-      if (pred->prim != prim) {
-        // penalize change of direction
-        if (pred->prim > 2) {
-          g += dis_wei * dx[0] * Constants::penaltyTurning * Constants::penaltyCOD + rand_wei_normal_occ;
-        } else {
-          g += dis_wei * dx[0] * Constants::penaltyTurning + rand_wei_normal_occ;
-        }
-      } else {
-        g += dis_wei * dx[0] + rand_wei_normal_occ;
-      }
-    }
-    // reverse driving
-    else {
-      // penalize turning and reversing
-      if (pred->prim != prim) {
-        // penalize change of direction
-        if (pred->prim < 3) {
-          g += dis_wei * dx[0] * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD + rand_wei_normal_occ;
-        } else {
-          g += dis_wei * dx[0] * Constants::penaltyTurning * Constants::penaltyReversing + rand_wei_normal_occ;
-        }
-      } else {
-        g += dis_wei * dx[0] * Constants::penaltyReversing + rand_wei_normal_occ;
-      }
-    }
-  } else if (cost_mode == 2) { /****************** weighted-traversability ******************/
-    int X = (int)(x + 0.5);
-    int Y = (int)(y + 0.5);
-    int occ = grid->data[Y * grid->info.width + X]; // occ_value $\in$ [0, 100]
-    double normal_occ = dx[0] * (occ - 0.0) / (100.0 - 0.0);
-    double wei_normal_occ = occ_wei * normal_occ;
-    // forward driving
-    if (prim < 3) {
-      // penalize turning
-      if (pred->prim != prim) {
-        // penalize change of direction
-        if (pred->prim > 2) {
-          g += dis_wei * dx[0] * Constants::penaltyTurning * Constants::penaltyCOD + wei_normal_occ;
-        } else {
-          g += dis_wei * dx[0] * Constants::penaltyTurning + wei_normal_occ;
-        }
-      } else {
-        g += dis_wei * dx[0] + wei_normal_occ;
-      }
-    }
-    // reverse driving
-    else {
-      // penalize turning and reversing
-      if (pred->prim != prim) {
-        // penalize change of direction
-        if (pred->prim < 3) {
-          g += dis_wei * dx[0] * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD + wei_normal_occ;
-        } else {
-          g += dis_wei * dx[0] * Constants::penaltyTurning * Constants::penaltyReversing + wei_normal_occ;
-        }
-      } else {
-        g += dis_wei * dx[0] * Constants::penaltyReversing + wei_normal_occ;
-      }
+    } else {
+      g += dx[0] * Constants::penaltyReversing;
     }
   }
 }

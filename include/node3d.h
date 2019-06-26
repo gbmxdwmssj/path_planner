@@ -5,6 +5,8 @@
 
 #include "constants.h"
 #include "helper.h"
+#include <nav_msgs/OccupancyGrid.h>
+
 namespace HybridAStar {
 /*!
    \brief A three dimensional node class that is at the heart of the algorithm.
@@ -76,7 +78,7 @@ class Node3D {
 
   // UPDATE METHODS
   /// Updates the cost-so-far for the node x' coming from its predecessor. It also discovers the node.
-  void updateG();
+  void updateG(int cost_mode, nav_msgs::OccupancyGrid::Ptr grid, double dis_wei, double occ_wei);
 
   // CUSTOM OPERATORS
   /// Custom operator to compare nodes. Nodes are equal if their x and y position as well as heading is similar.
@@ -105,9 +107,9 @@ class Node3D {
   static const float dt[];
 
  private:
-  /// the x position
+  /// the x position, unit: cellSize
   float x;
-  /// the y position
+  /// the y position, unit: cellSize
   float y;
   /// the heading theta
   float t;

@@ -2,6 +2,13 @@
  <!-- Turn on hybrid_astar node -->
  <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar" output="screen">
  <param name="occ_thre" type="int" value="80" />
+ <!-- 0: zero -->
+ <!-- 1: weighted-random-traversability -->
+ <!-- 2: weighted-traversability -->
+ <param name="cost_mode" type="int" value="0" />
+ <!-- dis_wei is alwasys 1.0 and you should adjust the other weight factors -->
+ <param name="dis_wei" type="double" value="1.0" />
+ <param name="occ_wei" type="double" value="2.5" />
  </node>
 
  <node name="tf_broadcaster" pkg="hybrid_astar" type="tf_broadcaster" />

@@ -37,9 +37,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
                                CollisionDetection& configurationSpace,
                                float* dubinsLookup,
                                Visualize& visualization,
-                               int cost_mode,
-                               double dis_wei,
-                               double occ_wei) {
+                               int cost_mode) {
 
   // PREDECESSOR AND SUCCESSOR INDEX
   int iPred, iSucc;
@@ -169,7 +167,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
       else {
         // _______________________
         // SEARCH WITH DUBINS SHOT
-        if (cost_mode == 0 && Constants::dubinsShot && nPred->isInRange(goal) && nPred->getPrim() < 3) {
+        if (Constants::dubinsShot && nPred->isInRange(goal) && nPred->getPrim() < 3) {
           nSucc = dubinsShot(*nPred, goal, configurationSpace);
 
           if (nSucc != nullptr && *nSucc == goal) {
@@ -195,7 +193,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
             if (!nodes3D[iSucc].isClosed() || iPred == iSucc) {
 
               // calculate new G value
-              nSucc->updateG(cost_mode, configurationSpace.getGrid(), dis_wei, occ_wei);
+              nSucc->updateG();
               newG = nSucc->getG();
 
               // if successor not on open list or found a shorter way to the cell

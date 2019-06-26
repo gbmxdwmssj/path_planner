@@ -8,6 +8,9 @@ Planner::Planner() {
   int thre = 99;
   n.getParam("/hybrid_astar/occ_thre", thre);
   configurationSpace.setOccThre(thre);
+
+  // srand(323);
+  printf("%lf\n", 1.0 * rand() / RAND_MAX);
   // _____
   // TODOS
   //    initializeLookups();
@@ -200,8 +203,18 @@ void Planner::plan() {
     // CLEAR THE PATH
     path.clear();
     smoothedPath.clear();
+    // GET THE PARAMETERS
+    int cost_mode = 0;
+    n.getParam("/hybrid_astar/cost_mode", cost_mode);
+
+    double dis_wei = 0.5;
+    n.getParam("/hybrid_astar/dis_wei", dis_wei);
+
+    double occ_wei = 0.5;
+    n.getParam("/hybrid_astar/occ_wei", occ_wei);
     // FIND THE PATH
-    Node3D* nSolution = Algorithm::hybridAStar(nStart, nGoal, nodes3D, nodes2D, width, height, configurationSpace, dubinsLookup, visualization);
+    Node3D* nSolution = Algorithm::hybridAStar(nStart, nGoal, nodes3D, nodes2D, width, height,
+      configurationSpace, dubinsLookup, visualization, cost_mode, dis_wei, occ_wei);
     // TRACE THE PATH
     smoother.tracePath(nSolution);
     // CREATE THE UPDATED PATH

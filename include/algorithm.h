@@ -49,7 +49,10 @@ class Algorithm {
                              int height,
                              CollisionDetection& configurationSpace,
                              float* dubinsLookup,
-                             Visualize& visualization);
+                             Visualize& visualization,
+                             int cost_mode,
+                             double dis_wei,
+                             double occ_wei);
 
 };
 }

@@ -91,6 +91,8 @@ class CollisionDetection {
 
   void setOccThre(int thre) {occ_thre = thre;}
 
+  nav_msgs::OccupancyGrid::Ptr getGrid() {return grid;}
+
  private:
   int occ_thre;
   /// The occupancy grid
