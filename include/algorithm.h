@@ -5,6 +5,7 @@
 #include <ompl/base/spaces/DubinsStateSpace.h>
 #include <ompl/base/spaces/SE2StateSpace.h>
 #include <ompl/base/State.h>
+#include <stdio.h>
 
 typedef ompl::base::SE2StateSpace::StateType State;
 

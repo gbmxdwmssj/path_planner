@@ -170,7 +170,37 @@ void Node3D::updateG(int cost_mode, nav_msgs::OccupancyGrid::Ptr grid, double di
         g += dis_wei * dx[0] * Constants::penaltyReversing + wei_normal_occ;
       }
     }
+  } else {
+    // forward driving
+    if (prim < 3) {
+      // penalize turning
+      if (pred->prim != prim) {
+        // penalize change of direction
+        if (pred->prim > 2) {
+          g += dx[0] * Constants::penaltyTurning * Constants::penaltyCOD;
+        } else {
+          g += dx[0] * Constants::penaltyTurning;
+        }
+      } else {
+        g += dx[0];
+      }
+    }
+    // reverse driving
+    else {
+      // penalize turning and reversing
+      if (pred->prim != prim) {
+        // penalize change of direction
+        if (pred->prim < 3) {
+          g += dx[0] * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD;
+        } else {
+          g += dx[0] * Constants::penaltyTurning * Constants::penaltyReversing;
+        }
+      } else {
+        g += dx[0] * Constants::penaltyReversing;
+      }
+    }
   }
+  
 }
 
 

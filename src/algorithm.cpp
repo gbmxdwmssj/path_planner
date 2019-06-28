@@ -76,7 +76,6 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
   long int loop_cnt = 0;
   // continue until O empty
   while (!O.empty() && ros::ok()) {
-    loop_cnt++;
 
     //    // DEBUG
     //    Node3D* pre = nullptr;
@@ -129,12 +128,21 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
 
     // pop node with lowest cost from priority queue
     nPred = O.top();
+    // if (nPred->isNotValid()) {
+    //   O.pop();
+    //   printf("Hit!\n");
+    //   continue;
+    // }
+
     // set index
     iPred = nPred->setIdx(width, height);
     iterations++;
 
     // RViz visualization
     if (Constants::visualization) {
+      // printf("aaaaaaa\n");
+      // int keypress = cin.get();
+      // printf("bbb\n");
       visualization.publishNode3DPoses(*nPred);
       visualization.publishNode3DPose(*nPred);
       d.sleep();
@@ -151,6 +159,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
     // _________________
     // EXPANSION OF NODE
     else if (nodes3D[iPred].isOpen()) {
+      loop_cnt++;
       // add node to closed list
       nodes3D[iPred].close();
       // remove node from open list
@@ -169,7 +178,8 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
       else {
         // _______________________
         // SEARCH WITH DUBINS SHOT
-        if (cost_mode == 0 && Constants::dubinsShot && nPred->isInRange(goal) && nPred->getPrim() < 3) {
+        // if (cost_mode == 0 && Constants::dubinsShot && nPred->isInRange(goal) && nPred->getPrim() < 3) {
+        if (Constants::dubinsShot && nPred->isInRange(goal) && nPred->getPrim() < 3) {
           nSucc = dubinsShot(*nPred, goal, configurationSpace);
 
           if (nSucc != nullptr && *nSucc == goal) {
@@ -192,31 +202,38 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
           if (nSucc->isOnGrid(width, height) && configurationSpace.isTraversable(nSucc)) {
 
             // ensure successor is not on closed list or it has the same index as the predecessor
-            if (!nodes3D[iSucc].isClosed() || iPred == iSucc) {
+            // if (!nodes3D[iSucc].isClosed() || iPred == iSucc) {
+            if (!nodes3D[iSucc].isClosed()) {
 
               // calculate new G value
               nSucc->updateG(cost_mode, configurationSpace.getGrid(), dis_wei, occ_wei);
               newG = nSucc->getG();
 
               // if successor not on open list or found a shorter way to the cell
-              if (!nodes3D[iSucc].isOpen() || newG < nodes3D[iSucc].getG() || iPred == iSucc) {
+              // if (!nodes3D[iSucc].isOpen() || newG < nodes3D[iSucc].getG() || iPred == iSucc) {
+              if (!nodes3D[iSucc].isOpen() || newG < nodes3D[iSucc].getG()) {
 
                 // calculate H value
                 updateH(*nSucc, goal, nodes2D, dubinsLookup, width, height, configurationSpace, visualization);
 
-                // if the successor is in the same cell but the C value is larger
-                if (iPred == iSucc && nSucc->getC() > nPred->getC() + Constants::tieBreaker) {
-                  delete nSucc;
-                  continue;
-                }
-                // if successor is in the same cell and the C value is lower, set predecessor to predecessor of predecessor
-                else if (iPred == iSucc && nSucc->getC() <= nPred->getC() + Constants::tieBreaker) {
-                  nSucc->setPred(nPred->getPred());
-                }
+                // // if the successor is in the same cell but the C value is larger
+                // if (iPred == iSucc && nSucc->getC() > nPred->getC() + Constants::tieBreaker) {
+                //   delete nSucc;
+                //   continue;
+                // }
+                // // if successor is in the same cell and the C value is lower, set predecessor to predecessor of predecessor
+                // else if (iPred == iSucc && nSucc->getC() <= nPred->getC() + Constants::tieBreaker) {
+                //   nSucc->setPred(nPred->getPred());
+                // }
 
                 if (nSucc->getPred() == nSucc) {
                   std::cout << "looping";
                 }
+
+                // zk: rewire
+                // if (nodes3D[iSucc].isOpen() && newG < nodes3D[iSucc].getG()) {
+                //   nodes3D[iSucc].setNotValid();
+                // }
 
                 // put successor on open list
                 nSucc->open();
@@ -463,6 +480,7 @@ void updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsLo
 
   // return the maximum of the heuristics, making the heuristic admissable
   start.setH(std::max(reedsSheppCost, std::max(dubinsCost, twoDCost)));
+  // start.setH(0.0);
 }
 
 //###################################################

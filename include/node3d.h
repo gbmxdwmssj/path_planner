@@ -17,7 +17,7 @@ class Node3D {
  public:
 
   /// The default constructor for 3D array initialization
-  Node3D(): Node3D(0, 0, 0, 0, 0, nullptr) {}
+  Node3D(): Node3D(0, 0, 0, 0, 0, nullptr) { this->not_valid = false; }
   /// Constructor for a node with the given arguments
   Node3D(float x, float y, float t, float g, float h, const Node3D* pred, int prim = 0) {
     this->x = x;
@@ -30,6 +30,7 @@ class Node3D {
     this->c = false;
     this->idx = -1;
     this->prim = prim;
+    this->not_valid = false;
   }
 
   // GETTER METHODS
@@ -96,6 +97,10 @@ class Node3D {
   /// Creates a successor in the continous space.
   Node3D* createSuccessor(const int i);
 
+  void setNotValid() { not_valid = true; }
+
+  bool isNotValid() { return not_valid; }
+
   // CONSTANT VALUES
   /// Number of possible directions
   static const int dir;
@@ -127,6 +132,8 @@ class Node3D {
   int prim;
   /// the predecessor pointer
   const Node3D* pred;
+  /// zk: not_valid
+  bool not_valid;
 };
 }
 #endif // NODE3D_H

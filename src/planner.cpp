@@ -10,7 +10,7 @@ Planner::Planner() {
   configurationSpace.setOccThre(thre);
 
   // srand(323);
-  printf("%lf\n", 1.0 * rand() / RAND_MAX);
+  // printf("%lf\n", 1.0 * rand() / RAND_MAX);
   // _____
   // TODOS
   //    initializeLookups();
@@ -237,6 +237,51 @@ void Planner::plan() {
     smoothedPath.publishPathVehicles();
     visualization.publishNode3DCosts(nodes3D, width, height, depth);
     visualization.publishNode2DCosts(nodes2D, width, height);
+
+    // _________________________________
+    // COMPREHENSIVE COST OF THE PATH
+    float dx0 = 0.7068582;
+    std::vector<Node3D> sPath = smoother.getPath();
+    float compre_cost = 0.0;
+    for (size_t i = 0; i < sPath.size()-1; ++i) {
+      int X = (int)(sPath[i].getX() + 0.5);
+      int Y = (int)(sPath[i].getY() + 0.5);
+      int occ = (configurationSpace.getGrid())->data[Y * (configurationSpace.getGrid())->info.width + X]; // occ_value $\in$ [0, 100]
+      double normal_occ = dx0 * (occ - 0.0) / (100.0 - 0.0);
+      double wei_normal_occ = occ_wei * normal_occ;
+      int prim = sPath[i].getPrim();
+      const Node3D* pred = sPath[i].getPred();
+      // forward driving
+      if (prim < 3) {
+        // penalize turning
+        if (pred->getPrim() != prim) {
+          // penalize change of direction
+          if (pred->getPrim() > 2) {
+            compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyCOD + wei_normal_occ;
+          } else {
+            compre_cost += dis_wei * dx0 * Constants::penaltyTurning + wei_normal_occ;
+          }
+        } else {
+          compre_cost += dis_wei * dx0 + wei_normal_occ;
+        }
+      }
+      // reverse driving
+      else {
+        // penalize turning and reversing
+        if (pred->getPrim() != prim) {
+          // penalize change of direction
+          if (pred->getPrim() < 3) {
+            compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD + wei_normal_occ;
+          } else {
+            compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyReversing + wei_normal_occ;
+          }
+        } else {
+          compre_cost += dis_wei * dx0 * Constants::penaltyReversing + wei_normal_occ;
+        }
+      }
+    }
+    printf("Comprehensive cost of the resultant path: %f\n", compre_cost);
+    printf("sPath.size(): %lu\n", sPath.size());
 
 
 

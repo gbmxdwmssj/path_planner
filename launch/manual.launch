@@ -8,7 +8,7 @@
  <param name="cost_mode" type="int" value="0" />
  <!-- dis_wei is alwasys 1.0 and you should adjust the other weight factors -->
  <param name="dis_wei" type="double" value="1.0" />
- <param name="occ_wei" type="double" value="2.5" />
+ <param name="occ_wei" type="double" value="0.0" />
  </node>
 
  <node name="tf_broadcaster" pkg="hybrid_astar" type="tf_broadcaster" />
