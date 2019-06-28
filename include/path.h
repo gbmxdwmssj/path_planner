@@ -22,16 +22,28 @@ namespace HybridAStar {
 class Path {
  public:
   /// The default constructor initializing the path object and setting publishers for the same.
-  Path(bool smoothed = false) {
-    std::string pathTopic = "/path";
-    std::string pathNodesTopic = "/pathNodes";
-    std::string pathVehicleTopic = "/pathVehicle";
+  Path(int mode = 0) {
 
-    if (smoothed) {
+     std::string pathTopic;
+     std::string pathNodesTopic;
+     std::string pathVehicleTopic;
+
+    if (mode == 0) {
+      pathTopic = "/path";
+      pathNodesTopic = "/pathNodes";
+      pathVehicleTopic = "/pathVehicle";
+      this->mode = mode;
+    }
+    else if (mode == 1) {
       pathTopic = "/sPath";
       pathNodesTopic = "/sPathNodes";
       pathVehicleTopic = "/sPathVehicle";
-      this->smoothed = smoothed;
+      this->mode = mode;
+    } else if (mode == 2) {
+      pathTopic = "/vPath";
+      pathNodesTopic = "/vPathNodes";
+      pathVehicleTopic = "/vPathVehicle";
+      this->mode = mode;
     }
 
     // _________________
@@ -103,8 +115,8 @@ class Path {
   visualization_msgs::MarkerArray pathNodes;
   /// Vehicle data structure for visualization
   visualization_msgs::MarkerArray pathVehicles;
-  /// Value that indicates that the path is smoothed/post processed
-  bool smoothed = false;
+  /// Value that indicates that the path is normal(0)/smoothed(1)/visued(2)
+  int mode = 0;
 };
 }
 #endif // PATH_H

@@ -203,6 +203,7 @@ void Planner::plan() {
     // CLEAR THE PATH
     path.clear();
     smoothedPath.clear();
+    smoothedVisuPath.clear();
     // GET THE PARAMETERS
     int cost_mode = 0;
     n.getParam("/hybrid_astar/cost_mode", cost_mode);
@@ -223,6 +224,18 @@ void Planner::plan() {
     smoother.smoothPath(voronoiDiagram);
     // CREATE THE UPDATED PATH
     smoothedPath.updatePath(smoother.getPath());
+
+    std::vector<Node3D> visuPath(smoother.getPath());
+    if (!visuPath.empty()) {
+      for (size_t i = 0; i < visuPath.size(); ++i) {
+        x = visuPath[i].getX();
+        y = visuPath[i].getY();
+        visuPath[i].setX(0.02 * x - 2.57);
+        visuPath[i].setY(0.02 * y - 2.57);
+      }
+    }
+    smoothedVisuPath.updatePath(visuPath);
+
     ros::Time t1 = ros::Time::now();
     ros::Duration d(t1 - t0);
     std::cout << "TIME in ms: " << d * 1000 << std::endl;
@@ -232,9 +245,15 @@ void Planner::plan() {
     path.publishPath();
     path.publishPathNodes();
     path.publishPathVehicles();
+
     smoothedPath.publishPath();
     smoothedPath.publishPathNodes();
     smoothedPath.publishPathVehicles();
+
+    smoothedVisuPath.publishPath();
+    smoothedVisuPath.publishPathNodes();
+    smoothedVisuPath.publishPathVehicles();
+
     visualization.publishNode3DCosts(nodes3D, width, height, depth);
     visualization.publishNode2DCosts(nodes2D, width, height);
 
@@ -243,40 +262,43 @@ void Planner::plan() {
     float dx0 = 0.7068582;
     std::vector<Node3D> sPath = smoother.getPath();
     float compre_cost = 0.0;
-    for (size_t i = 0; i < sPath.size()-1; ++i) {
-      int X = (int)(sPath[i].getX() + 0.5);
-      int Y = (int)(sPath[i].getY() + 0.5);
-      int occ = (configurationSpace.getGrid())->data[Y * (configurationSpace.getGrid())->info.width + X]; // occ_value $\in$ [0, 100]
-      double normal_occ = dx0 * (occ - 0.0) / (100.0 - 0.0);
-      double wei_normal_occ = occ_wei * normal_occ;
-      int prim = sPath[i].getPrim();
-      const Node3D* pred = sPath[i].getPred();
-      // forward driving
-      if (prim < 3) {
-        // penalize turning
-        if (pred->getPrim() != prim) {
-          // penalize change of direction
-          if (pred->getPrim() > 2) {
-            compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyCOD + wei_normal_occ;
+    if (!sPath.empty()) {
+      for (size_t i = 0; i < sPath.size()-1; ++i) {
+        int X = (int)(sPath[i].getX() + 0.5);
+        int Y = (int)(sPath[i].getY() + 0.5);
+        int occ = (configurationSpace.getGrid())->data[Y * (configurationSpace.getGrid())->info.width + X]; // occ_value $\in$ [0, 100]
+        double normal_occ = dx0 * (occ - 0.0) / (100.0 - 0.0);
+        double wei_normal_occ = occ_wei * normal_occ;
+        int prim = sPath[i].getPrim();
+        // const Node3D* pred = sPath[i].getPred();
+        const Node3D pred = sPath[i+1];
+        // forward driving
+        if (prim < 3) {
+          // penalize turning
+          if (pred.getPrim() != prim) {
+            // penalize change of direction
+            if (pred.getPrim() > 2) {
+              compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyCOD + wei_normal_occ;
+            } else {
+              compre_cost += dis_wei * dx0 * Constants::penaltyTurning + wei_normal_occ;
+            }
           } else {
-            compre_cost += dis_wei * dx0 * Constants::penaltyTurning + wei_normal_occ;
+            compre_cost += dis_wei * dx0 + wei_normal_occ;
           }
-        } else {
-          compre_cost += dis_wei * dx0 + wei_normal_occ;
         }
-      }
-      // reverse driving
-      else {
-        // penalize turning and reversing
-        if (pred->getPrim() != prim) {
-          // penalize change of direction
-          if (pred->getPrim() < 3) {
-            compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD + wei_normal_occ;
+        // reverse driving
+        else {
+          // penalize turning and reversing
+          if (pred.getPrim() != prim) {
+            // penalize change of direction
+            if (pred.getPrim() < 3) {
+              compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD + wei_normal_occ;
+            } else {
+              compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyReversing + wei_normal_occ;
+            }
           } else {
-            compre_cost += dis_wei * dx0 * Constants::penaltyTurning * Constants::penaltyReversing + wei_normal_occ;
+            compre_cost += dis_wei * dx0 * Constants::penaltyReversing + wei_normal_occ;
           }
-        } else {
-          compre_cost += dis_wei * dx0 * Constants::penaltyReversing + wei_normal_occ;
         }
       }
     }

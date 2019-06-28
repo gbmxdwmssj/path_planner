@@ -87,12 +87,20 @@ void Path::addNode(const Node3D& node, int i) {
   pathNode.header.stamp = ros::Time(0);
   pathNode.id = i;
   pathNode.type = visualization_msgs::Marker::SPHERE;
-  pathNode.scale.x = 0.1;
-  pathNode.scale.y = 0.1;
-  pathNode.scale.z = 0.1;
+
+  if (mode == 2) {
+    pathNode.scale.x = 0.02 * 0.1;
+    pathNode.scale.y = 0.02 * 0.1;
+    pathNode.scale.z = 0.02 * 0.1;
+  } else {
+    pathNode.scale.x = 0.1;
+    pathNode.scale.y = 0.1;
+    pathNode.scale.z = 0.1;
+  }
+
   pathNode.color.a = 1.0;
 
-  if (smoothed) {
+  if (mode == 1 || mode == 2) {
     pathNode.color.r = Constants::pink.red;
     pathNode.color.g = Constants::pink.green;
     pathNode.color.b = Constants::pink.blue;
@@ -119,12 +127,20 @@ void Path::addVehicle(const Node3D& node, int i) {
   pathVehicle.header.stamp = ros::Time(0);
   pathVehicle.id = i;
   pathVehicle.type = visualization_msgs::Marker::CUBE;
-  pathVehicle.scale.x = Constants::length - Constants::bloating * 2;
-  pathVehicle.scale.y = Constants::width - Constants::bloating * 2;
-  pathVehicle.scale.z = 1;
-  pathVehicle.color.a = 0.1;
 
-  if (smoothed) {
+  if (mode == 2) {
+    pathVehicle.scale.x = 0.02 * Constants::length - Constants::bloating * 2;
+    pathVehicle.scale.y = 0.02 * Constants::width - Constants::bloating * 2;
+    pathVehicle.scale.z = 0.02 * 1;
+  } else {
+    pathVehicle.scale.x = Constants::length - Constants::bloating * 2;
+    pathVehicle.scale.y = Constants::width - Constants::bloating * 2;
+    pathVehicle.scale.z = 1;
+  }
+
+  pathVehicle.color.a = 0.3;
+
+  if (mode == 1 || mode == 2) {
     pathVehicle.color.r = Constants::orange.red;
     pathVehicle.color.g = Constants::orange.green;
     pathVehicle.color.b = Constants::orange.blue;
