@@ -221,7 +221,7 @@ void Planner::plan() {
     // CREATE THE UPDATED PATH
     path.updatePath(smoother.getPath());
     // SMOOTH THE PATH
-    smoother.smoothPath(voronoiDiagram);
+    // smoother.smoothPath(voronoiDiagram);
     // CREATE THE UPDATED PATH
     smoothedPath.updatePath(smoother.getPath());
 

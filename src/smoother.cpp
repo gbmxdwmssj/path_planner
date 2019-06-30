@@ -73,7 +73,7 @@ void Smoother::smoothPath(DynamicVoronoi& voronoi) {
       newPath[i].setX(xi.getX());
       newPath[i].setY(xi.getY());
       Vector2D Dxi = xi - xim1;
-      newPath[i - 1].setT(std::atan2(Dxi.getY(), Dxi.getX()));
+      newPath[i - 1].setT(Helper::normalizeHeadingRad(std::atan2(Dxi.getY(), Dxi.getX())));
 
     }
 

@@ -5,13 +5,13 @@ import tf
 from hybrid_astar.srv import *
 
 def eulerFromQuaternion(req):
-    print('I get a quaternion!')
+    # print('I get a quaternion!')
     quaternion = (req.quaternion.x,
         req.quaternion.y,
         req.quaternion.z,
         req.quaternion.w)
     euler = tf.transformations.euler_from_quaternion(quaternion) # rad
-    print('I compute a euler!')
+    # print('I compute a euler!')
     return EulerFromQuaternionResponse(euler[0], euler[1], euler[2]) # rad
 
 rospy.init_node('euler_quaternion_server', anonymous=True)
