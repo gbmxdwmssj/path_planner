@@ -45,8 +45,17 @@ def callback(path):
         dx = x - path.poses[i-1].pose.position.x
         dy = y - path.poses[i-1].pose.position.y
         l_f = l_f + math.sqrt(dx*dx + dy*dy)
+    l_list.append(l_f)
+    euler = euler_from_quaternion(path.poses[0].pose.orientation)
+    yaw = normalizedHeadingRad(euler.yaw)
+    theta_z_list.append(yaw)
     print('path length')
     print(l_f)
+    print('l_list')
+    print(l_list)
+    print('theta_z_list')
+    print(theta_z_list)
+    l_to_theta_z = interp1d(l_list, theta_z_list, kind='slinear')
 
     frac_1 = (v_tra - v_0)*(v_tra - v_0) / (2 * a_0)
     frac_2 = (v_tra - v_f)*(v_tra - v_f) / (2 * a_f)
@@ -72,6 +81,11 @@ def callback(path):
             l = trape_1_area + v_tra * (t_2 - t_1) + (up + v_tra) * (t - t_2) * 0.5
         print('l')
         print(l)
+        if k == K - 1:
+            l = l - 0.000001
+        theta_z = l_to_theta_z(l)
+        print('theta_z')
+        print(theta_z)
 
 rospy.init_node('feature_extraction', anonymous=True)
 print('I waiting for service /euler_from_quaternion...')
