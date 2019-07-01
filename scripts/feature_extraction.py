@@ -6,7 +6,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from nav_msgs.msg import Path
 from hybrid_astar.srv import *
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import *
 import pylab as pl
 
 def radMinus(rad_1, rad_2): # [0, 2pi)
@@ -75,17 +75,22 @@ def callback(path):
     # print(len(paths))
 
     fea_list = []
+    dims = []
+    data_offset = 0
     for path in paths:
         fea = calcFeature(path)
         fea_list = fea_list + fea.data
         print(len(fea.data))
-        data_offset = len(fea.data)
+        data_offset += len(fea.data)
+        single_dim = MultiArrayDimension()
+        single_dim.stride = data_offset
+        dims.append(single_dim)
     print('number of features:')
     print(len(fea_list))
     # print(fea_list)
     features = Float64MultiArray()
     features.data = fea_list
-    features.layout.data_offset = data_offset
+    features.layout.dim = dims
     pub.publish(features)
 
 def calcFeature(path):
@@ -153,8 +158,14 @@ def calcFeature(path):
     v_feature = Float64MultiArray()
     v_feature.data = [v_0, a_0, v_tra, a_f, v_f, t_f]
 
-    K = 200
+    # K = 19
+    # Delta_t = t_f / (K - 1)
+    Delta_t = 0.5 # s
+    K = int(t_f / Delta_t) + 1
+    print('K:')
+    print(K)
     Delta_t = t_f / (K - 1)
+
     omega_z_feature = Float64MultiArray()
     dt = rospy.get_param('/hybrid_astar/dt') # s
     bias = 0.000001

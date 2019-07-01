@@ -68,11 +68,14 @@ def callback(features):
     euler_from_quaternion = rospy.ServiceProxy('/euler_from_quaternion', EulerFromQuaternion)
     print('I get some features!')
     ## division
-    offset = features.layout.data_offset
-    fea_num = int(len(features.data) / offset + 0.5)
+    dims = features.layout.dim
+    fea_num = len(dims)
     fea_list = []
     for i in range(fea_num):
-        fea_list.append(list(features.data[i*offset:(i+1)*offset-1]))
+        if i == 0:
+            fea_list.append(list(features.data[0:dims[i].stride]))
+        else:
+            fea_list.append(list(features.data[dims[i-1].stride:dims[i].stride]))
     # print(fea_list)
     whole_path = Path()
     whole_path.header.frame_id = 'path'
@@ -88,13 +91,12 @@ def callback(features):
             tlen = len(path.poses)
             posi = path.poses[tlen-1].pose.position
             euler = euler_from_quaternion(path.poses[tlen-1].pose.orientation)
-            print(euler.yaw)
             path = calc_predicted_path(feature,
                 posi.x, posi.y, posi.z,
                 euler.roll, euler.pitch, euler.yaw)
         whole_path.poses += path.poses
     pub.publish(whole_path)
-    # pl.show()
+    pl.show()
 
 
 
@@ -112,9 +114,9 @@ def calc_predicted_path(feature, x0, y0, z0, theta_x0, theta_y0, theta_z0):
         omega_z_list.append(feature.data[i])
 
     t_to_omega_z = interp1d(t_list, omega_z_list, kind='cubic')
-    # t_new = np.linspace(0, t_f - 0.01, 1000)
-    # omega_z_new = t_to_omega_z(t_new)
-    # pl.plot(t_new, omega_z_new)
+    t_new = np.linspace(0, t_f - 0.1, 1000)
+    omega_z_new = t_to_omega_z(t_new)
+    pl.plot(t_new, omega_z_new)
 
     h = rospy.get_param('/hybrid_astar/dt') # s
     t = 0
