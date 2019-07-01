@@ -75,7 +75,8 @@ void Node3D::updateG(int cost_mode, nav_msgs::OccupancyGrid::Ptr grid, double di
     // forward driving
     if (prim < 3) {
       // penalize turning
-      if (pred->prim != prim) {
+      // if (pred->prim != prim) {
+      if (prim != 0) {
         // penalize change of direction
         if (pred->prim > 2) {
           g += dx[0] * Constants::penaltyTurning * Constants::penaltyCOD;
@@ -89,7 +90,8 @@ void Node3D::updateG(int cost_mode, nav_msgs::OccupancyGrid::Ptr grid, double di
     // reverse driving
     else {
       // penalize turning and reversing
-      if (pred->prim != prim) {
+      // if (pred->prim != prim) {
+      if (prim != 3) {
         // penalize change of direction
         if (pred->prim < 3) {
           g += dx[0] * Constants::penaltyTurning * Constants::penaltyReversing * Constants::penaltyCOD;

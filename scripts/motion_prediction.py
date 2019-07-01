@@ -8,6 +8,9 @@ from std_msgs.msg import Float64MultiArray
 from scipy.interpolate import interp1d
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
+from hybrid_astar.srv import *
+
+
 
 # class State:
 #     def __init__(self, x, y, z, theta_x, theta_y, theta_z):
@@ -62,6 +65,7 @@ def t_to_v(t, feature):
 
 
 def callback(features):
+    euler_from_quaternion = rospy.ServiceProxy('/euler_from_quaternion', EulerFromQuaternion)
     print('I get some features!')
     ## division
     offset = features.layout.data_offset
@@ -72,16 +76,30 @@ def callback(features):
     # print(fea_list)
     whole_path = Path()
     whole_path.header.frame_id = 'path'
+    path = None
     for fea in fea_list:
         feature = Float64MultiArray()
         feature.data = fea
-        path = calc_predicted_path(feature)
+        if path is None:
+            path = calc_predicted_path(feature,
+                feature.data[0], feature.data[1], feature.data[2],
+                feature.data[3], feature.data[4], feature.data[5])
+        else:
+            tlen = len(path.poses)
+            posi = path.poses[tlen-1].pose.position
+            euler = euler_from_quaternion(path.poses[tlen-1].pose.orientation)
+            print(euler.yaw)
+            path = calc_predicted_path(feature,
+                posi.x, posi.y, posi.z,
+                euler.roll, euler.pitch, euler.yaw)
         whole_path.poses += path.poses
     pub.publish(whole_path)
+    # pl.show()
 
 
 
-def calc_predicted_path(feature):
+def calc_predicted_path(feature, x0, y0, z0, theta_x0, theta_y0, theta_z0):
+    quaternion_from_euler = rospy.ServiceProxy('/quaternion_from_euler', QuaternionFromEuler)
     t_f = feature.data[11]
     t_list = []
     omega_z_list = []
@@ -93,8 +111,6 @@ def calc_predicted_path(feature):
     for i in range(12, len(feature.data), 1):
         omega_z_list.append(feature.data[i])
 
-    # print(t_list)
-    # print(omega_z_list)
     t_to_omega_z = interp1d(t_list, omega_z_list, kind='cubic')
     # t_new = np.linspace(0, t_f - 0.01, 1000)
     # omega_z_new = t_to_omega_z(t_new)
@@ -102,8 +118,7 @@ def calc_predicted_path(feature):
 
     h = rospy.get_param('/hybrid_astar/dt') # s
     t = 0
-    s = [feature.data[0], feature.data[1], feature.data[2],
-        feature.data[3], feature.data[4], feature.data[5]]
+    s = [x0, y0, z0, theta_x0, theta_y0, theta_z0]
     s_list = []
     s_list.append(s)
     while t <= t_f:
@@ -121,15 +136,15 @@ def calc_predicted_path(feature):
         pose = PoseStamped()
         pose.pose.position.x = s[0]
         pose.pose.position.y = s[1]
-        pose.pose.orientation.w = 1.0
+        pose.pose.orientation = quaternion_from_euler(s[3], s[4], s[5]).quaternion
         predicted_path.poses.append(pose)
     return predicted_path
-    # pub.publish(predicted_path)
-    # pl.show()
 
 
 
 rospy.init_node('motion_prediction', anonymous=True)
 rospy.Subscriber('/path_feature', Float64MultiArray, callback)
+rospy.wait_for_service('/euler_from_quaternion')
+rospy.wait_for_service('/quaternion_from_euler')
 pub = rospy.Publisher('/predicted_path', Path, queue_size=10)
 rospy.spin()

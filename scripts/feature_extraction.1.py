@@ -153,62 +153,56 @@ def calcFeature(path):
     v_feature = Float64MultiArray()
     v_feature.data = [v_0, a_0, v_tra, a_f, v_f, t_f]
 
-    K = 200
+    K = 19
     Delta_t = t_f / (K - 1)
     omega_z_feature = Float64MultiArray()
     dt = rospy.get_param('/hybrid_astar/dt') # s
     bias = 0.000001
-    t_wide = 7 # dt
 
     for k in range(K):
-        t_center = k * Delta_t
-        omega_z_sum = 0.0
-        omega_z_cnt = 0
-        for t in np.arange(t_center-t_wide*dt, t_center+t_wide*dt, dt):
-            l = t_to_l(t, v_feature)
-            if k == K - 1:
-                l_minus = t_to_l(t - dt, v_feature)
+        t = k * Delta_t
+        l = t_to_l(t, v_feature)
+        if k == K - 1:
+            l_minus = t_to_l(t - dt, v_feature)
+        else:
+            l_plus = t_to_l(t + dt, v_feature)
+
+        if abs(l) > abs(l_f):
+            l = l_f
+        if k == K - 1 and abs(l_minus) > abs(l_f):
+            l_minus = l_f
+        if k != K - 1 and abs(l_plus) > abs(l_f):
+            l_plus = l_f
+
+        c_theta_z = min(max(l_to_c_theta_z(l), -1), 1)
+        s_theta_z =  min(max(l_to_s_theta_z(l), -1), 1)
+        if s_theta_z >= 0:
+            theta_z = normalizedHeadingRad(math.acos(c_theta_z))
+        else:
+            theta_z = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z)) - bias
+
+        if k == K - 1:
+            c_theta_z_minus = min(max(l_to_c_theta_z(l_minus), -1), 1)
+            s_theta_z_minus =  min(max(l_to_s_theta_z(l_minus), -1), 1)
+            if s_theta_z_minus >= 0:
+                theta_z_minus = normalizedHeadingRad(math.acos(c_theta_z_minus))
             else:
-                l_plus = t_to_l(t + dt, v_feature)
-
-            if abs(l) > abs(l_f):
-                l = l_f
-            if k == K - 1 and abs(l_minus) > abs(l_f):
-                l_minus = l_f
-            if k != K - 1 and abs(l_plus) > abs(l_f):
-                l_plus = l_f
-
-            c_theta_z = min(max(l_to_c_theta_z(l), -1), 1)
-            s_theta_z =  min(max(l_to_s_theta_z(l), -1), 1)
-            if s_theta_z >= 0:
-                theta_z = normalizedHeadingRad(math.acos(c_theta_z))
+                theta_z_minus = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z_minus)) - bias
+            # print(theta_z)
+            # print(theta_z_minus)
+            omega_z = radMinus(theta_z, theta_z_minus) / dt
+        else:
+            c_theta_z_plus = min(max(l_to_c_theta_z(l_plus), -1), 1)
+            s_theta_z_plus =  min(max(l_to_s_theta_z(l_plus), -1), 1)
+            if s_theta_z_plus >= 0:
+                theta_z_plus = normalizedHeadingRad(math.acos(c_theta_z_plus))
             else:
-                theta_z = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z)) - bias
+                theta_z_plus = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z_plus)) - bias
+            # print(theta_z_plus)
+            # print(theta_z)
+            omega_z = radMinus(theta_z_plus, theta_z) / dt
 
-            if k == K - 1:
-                c_theta_z_minus = min(max(l_to_c_theta_z(l_minus), -1), 1)
-                s_theta_z_minus =  min(max(l_to_s_theta_z(l_minus), -1), 1)
-                if s_theta_z_minus >= 0:
-                    theta_z_minus = normalizedHeadingRad(math.acos(c_theta_z_minus))
-                else:
-                    theta_z_minus = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z_minus)) - bias
-                # print(theta_z)
-                # print(theta_z_minus)
-                omega_z = radMinus(theta_z, theta_z_minus) / dt
-            else:
-                c_theta_z_plus = min(max(l_to_c_theta_z(l_plus), -1), 1)
-                s_theta_z_plus =  min(max(l_to_s_theta_z(l_plus), -1), 1)
-                if s_theta_z_plus >= 0:
-                    theta_z_plus = normalizedHeadingRad(math.acos(c_theta_z_plus))
-                else:
-                    theta_z_plus = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z_plus)) - bias
-                # print(theta_z_plus)
-                # print(theta_z)
-                omega_z = radMinus(theta_z_plus, theta_z) / dt
-            omega_z_sum += omega_z
-            omega_z_cnt += 1
-
-        omega_z_feature.data.append(omega_z_sum / omega_z_cnt)
+        omega_z_feature.data.append(omega_z)
 
     # print(omega_z_feature.data)
     feature = Float64MultiArray()

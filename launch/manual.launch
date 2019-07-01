@@ -17,6 +17,7 @@
  <node name="occupancy_server" pkg="grid_map_demos" type="occupancy_server.py" args="$(find hybrid_astar)/maps/occ-map-2019-06-28-17:20:17.yaml" />
  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_astar)/launch/config.rviz" />
  <node name="euler_from_quaternion" pkg="hybrid_astar" type="euler_from_quaternion.py"  output="screen" />
+ <node name="quaternion_from_euler" pkg="hybrid_astar" type="quaternion_from_euler.py"  output="screen" />
  <node name="feature_extraction" pkg="hybrid_astar" type="feature_extraction.py"  output="screen" />
  <node name="motion_prediction" pkg="hybrid_astar" type="motion_prediction.py"  output="screen" />
 </launch>

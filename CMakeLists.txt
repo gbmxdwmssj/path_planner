@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
     FILES
     EulerFromQuaternion.srv
+    QuaternionFromEuler.srv
 )
 
 generate_messages(

@@ -91,7 +91,7 @@ static const float tieBreaker = 0.01;
 /// [#] --- A factor to ensure admissibility of the holonomic with obstacles heuristic
 static const float factor2D = sqrt(5) / sqrt(2) + 1;
 /// [#] --- A movement cost penalty for turning (choosing non straight motion primitives)
-static const float penaltyTurning = 1.05;
+static const float penaltyTurning = 1.1;
 /// [#] --- A movement cost penalty for reversing (choosing motion primitives > 2)
 static const float penaltyReversing = 2.0;
 /// [#] --- A movement cost penalty for change of direction (changing from primitives < 3 to primitives > 2)
