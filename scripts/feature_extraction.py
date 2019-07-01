@@ -64,18 +64,39 @@ def callback(path):
     if len(path.poses) == 0:
         return
 
+    ## division
+    single_path = []
+    paths = []
+    for i in range(len(path.poses) - 1, 0, -1):
+        single_path.append(path.poses[i])
+        cur_dir = path.poses[i].header.frame_id
+        next_dir = path.poses[i-1].header.frame_id
+        if cur_dir != next_dir:
+            if len(single_path) >= 2:
+                paths.append(single_path)
+            single_path = []
+    single_path.append(path.poses[0])
+    if len(single_path) >= 2:
+        paths.append(single_path)
+    print('number of paths:')
+    print(len(paths))
+    
     ## compute the lenght of the path
     l_f = 0.0
     l_list = []
     c_theta_z_list = []
+    s_theta_z_list = []
     euler_from_quaternion = rospy.ServiceProxy('/euler_from_quaternion', EulerFromQuaternion)
     for i in range(len(path.poses) - 1, 0, -1):
         l_list.append(l_f)
         
         euler = euler_from_quaternion(path.poses[i].pose.orientation)
         yaw = normalizedHeadingRad(euler.yaw)
+        # print(yaw)
         c_theta_z = math.cos(yaw)
+        s_theta_z = math.sin(yaw)
         c_theta_z_list.append(c_theta_z)
+        s_theta_z_list.append(s_theta_z)
 
         x = path.poses[i].pose.position.x
         y = path.poses[i].pose.position.y
@@ -87,11 +108,14 @@ def callback(path):
     euler = euler_from_quaternion(path.poses[0].pose.orientation)
     yaw = normalizedHeadingRad(euler.yaw)
     c_theta_z = math.cos(yaw)
+    s_theta_z = math.sin(yaw)
     c_theta_z_list.append(c_theta_z)
+    s_theta_z_list.append(s_theta_z)
     l_to_c_theta_z = interp1d(l_list, c_theta_z_list, kind='slinear')
-    l_new = np.linspace(0, l_f, 1000)
-    c_theta_z_new = l_to_c_theta_z(l_new)
-    pl.plot(l_new, c_theta_z_new)
+    l_to_s_theta_z = interp1d(l_list, s_theta_z_list, kind='slinear')
+    # l_new = np.linspace(0, l_f, 1000)
+    # c_theta_z_new = l_to_c_theta_z(l_new)
+    # pl.plot(l_new, c_theta_z_new)
 
     frac_1 = (v_tra - v_0)*(v_tra - v_0) / (2 * a_0)
     frac_2 = (v_tra - v_f)*(v_tra - v_f) / (2 * a_f)
@@ -102,37 +126,49 @@ def callback(path):
     v_feature = Float64MultiArray()
     v_feature.data = [v_0, a_0, v_tra, a_f, v_f, t_f]
 
-    K = 9
+    K = 200
     Delta_t = t_f / (K - 1)
     omega_z_feature = Float64MultiArray()
     dt = rospy.get_param('/hybrid_astar/dt') # s
     for k in range(K):
         t = k * Delta_t
         l = t_to_l(t, v_feature)
-        c_theta_z = l_to_c_theta_z(l)
-        theta_z = normalizedHeadingRad(math.acos(c_theta_z))
         if k == K - 1:
             l_minus = t_to_l(t - dt, v_feature)
             l = l - 0.000001
         else:
             l_plus = t_to_l(t + dt, v_feature)
+        c_theta_z = min(max(l_to_c_theta_z(l), -1), 1)
+        s_theta_z =  min(max(l_to_s_theta_z(l), -1), 1)
+        if s_theta_z >= 0:
+            theta_z = normalizedHeadingRad(math.acos(c_theta_z))
+        else:
+            theta_z = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z))
 
         if k == K - 1:
-            c_theta_z_minus = l_to_c_theta_z(l_minus)
-            theta_z_minus = normalizedHeadingRad(math.acos(c_theta_z_minus))
-            print(theta_z)
-            print(theta_z_minus)
+            c_theta_z_minus = min(max(l_to_c_theta_z(l_minus), -1), 1)
+            s_theta_z_minus =  min(max(l_to_s_theta_z(l_minus), -1), 1)
+            if s_theta_z_minus >= 0:
+                theta_z_minus = normalizedHeadingRad(math.acos(c_theta_z_minus))
+            else:
+                theta_z_minus = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z_minus))
+            # print(theta_z)
+            # print(theta_z_minus)
             omega_z = radMinus(theta_z, theta_z_minus) / dt
         else:
-            c_theta_z_plus = l_to_c_theta_z(l_plus)
-            theta_z_plus = normalizedHeadingRad(math.acos(c_theta_z_plus))
-            print(theta_z_plus)
-            print(theta_z)
+            c_theta_z_plus = min(max(l_to_c_theta_z(l_plus), -1), 1)
+            s_theta_z_plus =  min(max(l_to_s_theta_z(l_plus), -1), 1)
+            if s_theta_z_plus >= 0:
+                theta_z_plus = normalizedHeadingRad(math.acos(c_theta_z_plus))
+            else:
+                theta_z_plus = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z_plus))
+            # print(theta_z_plus)
+            # print(theta_z)
             omega_z = radMinus(theta_z_plus, theta_z) / dt
 
         omega_z_feature.data.append(omega_z)
 
-    print(omega_z_feature.data)
+    # print(omega_z_feature.data)
     feature = Float64MultiArray()
     tmp_len = len(path.poses)
     x0 = path.poses[tmp_len-1].pose.position.x

@@ -75,6 +75,11 @@ void Path::addSegment(const Node3D& node) {
     vertex.pose.orientation.w = 0;
   }
 
+  if (node.getPrim() < 3) {
+    vertex.header.frame_id = "forward";
+  } else {
+    vertex.header.frame_id = "reverse";
+  }
   path.poses.push_back(vertex);
 }
 

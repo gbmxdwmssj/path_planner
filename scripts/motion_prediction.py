@@ -77,9 +77,9 @@ def callback(feature):
     # print(t_list)
     # print(omega_z_list)
     t_to_omega_z = interp1d(t_list, omega_z_list, kind='cubic')
-    t_new = np.linspace(0, t_f, 1000)
-    omega_z_new = t_to_omega_z(t_new)
-    pl.plot(t_new, omega_z_new)
+    # t_new = np.linspace(0, t_f - 0.01, 1000)
+    # omega_z_new = t_to_omega_z(t_new)
+    # pl.plot(t_new, omega_z_new)
 
     h = rospy.get_param('/hybrid_astar/dt') # s
     t = 0
@@ -97,7 +97,7 @@ def callback(feature):
     # print(s_list)
 
     predicted_path = Path()
-    predicted_path.header.frame_id = 'map'
+    predicted_path.header.frame_id = 'path'
     for s in s_list:
         pose = PoseStamped()
         pose.pose.position.x = s[0]
