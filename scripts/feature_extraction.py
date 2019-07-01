@@ -67,14 +67,15 @@ def callback(path):
     ## compute the lenght of the path
     l_f = 0.0
     l_list = []
-    theta_z_list = []
+    c_theta_z_list = []
     euler_from_quaternion = rospy.ServiceProxy('/euler_from_quaternion', EulerFromQuaternion)
     for i in range(len(path.poses) - 1, 0, -1):
         l_list.append(l_f)
         
         euler = euler_from_quaternion(path.poses[i].pose.orientation)
         yaw = normalizedHeadingRad(euler.yaw)
-        theta_z_list.append(yaw)
+        c_theta_z = math.cos(yaw)
+        c_theta_z_list.append(c_theta_z)
 
         x = path.poses[i].pose.position.x
         y = path.poses[i].pose.position.y
@@ -85,13 +86,12 @@ def callback(path):
     l_list.append(l_f)
     euler = euler_from_quaternion(path.poses[0].pose.orientation)
     yaw = normalizedHeadingRad(euler.yaw)
-    theta_z_list.append(yaw)
-    l_to_theta_z = interp1d(l_list, theta_z_list, kind='slinear')
+    c_theta_z = math.cos(yaw)
+    c_theta_z_list.append(c_theta_z)
+    l_to_c_theta_z = interp1d(l_list, c_theta_z_list, kind='slinear')
     l_new = np.linspace(0, l_f, 1000)
-    theta_z_new = l_to_theta_z(l_new)
-    print('theta_z_list:')
-    print(theta_z_list)
-    pl.plot(l_new, theta_z_new)
+    c_theta_z_new = l_to_c_theta_z(l_new)
+    pl.plot(l_new, c_theta_z_new)
 
     frac_1 = (v_tra - v_0)*(v_tra - v_0) / (2 * a_0)
     frac_2 = (v_tra - v_f)*(v_tra - v_f) / (2 * a_f)
@@ -109,7 +109,8 @@ def callback(path):
     for k in range(K):
         t = k * Delta_t
         l = t_to_l(t, v_feature)
-        theta_z = l_to_theta_z(l)
+        c_theta_z = l_to_c_theta_z(l)
+        theta_z = normalizedHeadingRad(math.acos(c_theta_z))
         if k == K - 1:
             l_minus = t_to_l(t - dt, v_feature)
             l = l - 0.000001
@@ -117,12 +118,14 @@ def callback(path):
             l_plus = t_to_l(t + dt, v_feature)
 
         if k == K - 1:
-            theta_z_minus = l_to_theta_z(l_minus)
+            c_theta_z_minus = l_to_c_theta_z(l_minus)
+            theta_z_minus = normalizedHeadingRad(math.acos(c_theta_z_minus))
             print(theta_z)
             print(theta_z_minus)
             omega_z = radMinus(theta_z, theta_z_minus) / dt
         else:
-            theta_z_plus = l_to_theta_z(l_plus)
+            c_theta_z_plus = l_to_c_theta_z(l_plus)
+            theta_z_plus = normalizedHeadingRad(math.acos(c_theta_z_plus))
             print(theta_z_plus)
             print(theta_z)
             omega_z = radMinus(theta_z_plus, theta_z) / dt
@@ -139,7 +142,7 @@ def callback(path):
     theta_z0 = yaw
     feature.data = [x0, y0, 0, 0, 0, theta_z0] + v_feature.data + omega_z_feature.data
     pub.publish(feature)
-    pl.show()
+    # pl.show()
 
 rospy.init_node('feature_extraction', anonymous=True)
 print('I waiting for service /euler_from_quaternion...')
