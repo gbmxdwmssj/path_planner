@@ -9,6 +9,7 @@
  <!-- dis_wei is alwasys 1.0 and you should adjust the other weight factors -->
  <param name="dis_wei" type="double" value="1.0" />
  <param name="occ_wei" type="double" value="30.0" />
+ <param name="dt" type="double" value="0.1" />
  </node>
 
  <node name="tf_broadcaster" pkg="hybrid_astar" type="tf_broadcaster" />
@@ -16,4 +17,5 @@
  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_astar)/launch/config.rviz" />
  <node name="euler_from_quaternion" pkg="hybrid_astar" type="euler_from_quaternion.py"  output="screen" />
  <node name="feature_extraction" pkg="hybrid_astar" type="feature_extraction.py"  output="screen" />
+ <node name="motion_prediction" pkg="hybrid_astar" type="motion_prediction.py"  output="screen" />
 </launch>
