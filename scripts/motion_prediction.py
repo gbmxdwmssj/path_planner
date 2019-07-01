@@ -61,8 +61,27 @@ def t_to_v(t, feature):
 
 
 
-def callback(feature):
-    print('I get a path feature!')
+def callback(features):
+    print('I get some features!')
+    ## division
+    offset = features.layout.data_offset
+    fea_num = int(len(features.data) / offset + 0.5)
+    fea_list = []
+    for i in range(fea_num):
+        fea_list.append(list(features.data[i*offset:(i+1)*offset-1]))
+    # print(fea_list)
+    whole_path = Path()
+    whole_path.header.frame_id = 'path'
+    for fea in fea_list:
+        feature = Float64MultiArray()
+        feature.data = fea
+        path = calc_predicted_path(feature)
+        whole_path.poses += path.poses
+    pub.publish(whole_path)
+
+
+
+def calc_predicted_path(feature):
     t_f = feature.data[11]
     t_list = []
     omega_z_list = []
@@ -104,7 +123,8 @@ def callback(feature):
         pose.pose.position.y = s[1]
         pose.pose.orientation.w = 1.0
         predicted_path.poses.append(pose)
-    pub.publish(predicted_path)
+    return predicted_path
+    # pub.publish(predicted_path)
     # pl.show()
 
 

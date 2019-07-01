@@ -9,13 +9,6 @@ from hybrid_astar.srv import *
 from std_msgs.msg import Float64MultiArray
 import pylab as pl
 
-v_0 = 0.0 # m/s
-a_0 = 2.0 # m/s^2
-v_tra = 3.0
-a_f = -2.0
-v_f = 0.0
-t_f = None
-
 def radMinus(rad_1, rad_2): # [0, 2pi)
     assert (rad_1 >=0 and rad_1 < 2 * math.pi)
     assert (rad_2 >=0 and rad_2 < 2 * math.pi)
@@ -78,34 +71,67 @@ def callback(path):
     single_path.append(path.poses[0])
     if len(single_path) >= 2:
         paths.append(single_path)
-    print('number of paths:')
-    print(len(paths))
-    
+    # print('number of paths:')
+    # print(len(paths))
+
+    fea_list = []
+    for path in paths:
+        fea = calcFeature(path)
+        fea_list = fea_list + fea.data
+        print(len(fea.data))
+        data_offset = len(fea.data)
+    print('number of features:')
+    print(len(fea_list))
+    # print(fea_list)
+    features = Float64MultiArray()
+    features.data = fea_list
+    features.layout.data_offset = data_offset
+    pub.publish(features)
+
+def calcFeature(path):
+    if path[0].header.frame_id == 'forward':
+        print('forward!')
+        v_0 = 0.0 # m/s
+        a_0 = 2.0 # m/s^2
+        v_tra = 3.0
+        a_f = -2.0
+        v_f = 0.0
+        t_f = None
+    else:
+        print('reverse!')
+        v_0 = 0.0 # m/s
+        a_0 = -2.0 # m/s^2
+        v_tra = -3.0
+        a_f = 2.0
+        v_f = 0.0
+        t_f = None
+
     ## compute the lenght of the path
     l_f = 0.0
     l_list = []
     c_theta_z_list = []
     s_theta_z_list = []
     euler_from_quaternion = rospy.ServiceProxy('/euler_from_quaternion', EulerFromQuaternion)
-    for i in range(len(path.poses) - 1, 0, -1):
+    for i in range(len(path) - 1):
         l_list.append(l_f)
         
-        euler = euler_from_quaternion(path.poses[i].pose.orientation)
+        euler = euler_from_quaternion(path[i].pose.orientation)
         yaw = normalizedHeadingRad(euler.yaw)
-        # print(yaw)
         c_theta_z = math.cos(yaw)
         s_theta_z = math.sin(yaw)
         c_theta_z_list.append(c_theta_z)
         s_theta_z_list.append(s_theta_z)
 
-        x = path.poses[i].pose.position.x
-        y = path.poses[i].pose.position.y
-        dx = x - path.poses[i-1].pose.position.x
-        dy = y - path.poses[i-1].pose.position.y
+        x = path[i].pose.position.x
+        y = path[i].pose.position.y
+        dx = x - path[i+1].pose.position.x
+        dy = y - path[i+1].pose.position.y
         dis = math.sqrt(dx*dx + dy*dy)
+        if v_tra < 0:
+            dis = -dis
         l_f = l_f + dis
     l_list.append(l_f)
-    euler = euler_from_quaternion(path.poses[0].pose.orientation)
+    euler = euler_from_quaternion(path[0].pose.orientation)
     yaw = normalizedHeadingRad(euler.yaw)
     c_theta_z = math.cos(yaw)
     s_theta_z = math.sin(yaw)
@@ -116,6 +142,7 @@ def callback(path):
     # l_new = np.linspace(0, l_f, 1000)
     # c_theta_z_new = l_to_c_theta_z(l_new)
     # pl.plot(l_new, c_theta_z_new)
+    # pl.show()
 
     frac_1 = (v_tra - v_0)*(v_tra - v_0) / (2 * a_0)
     frac_2 = (v_tra - v_f)*(v_tra - v_f) / (2 * a_f)
@@ -130,14 +157,21 @@ def callback(path):
     Delta_t = t_f / (K - 1)
     omega_z_feature = Float64MultiArray()
     dt = rospy.get_param('/hybrid_astar/dt') # s
+    if v_tra < 0:
+        bias =  0.000001
+    else:
+        bias = -0.000001
+
     for k in range(K):
         t = k * Delta_t
         l = t_to_l(t, v_feature)
         if k == K - 1:
             l_minus = t_to_l(t - dt, v_feature)
-            l = l - 0.000001
+            l = l + bias
         else:
             l_plus = t_to_l(t + dt, v_feature)
+            if l_plus > l_f:
+                l_plus = l_plus + bias
         c_theta_z = min(max(l_to_c_theta_z(l), -1), 1)
         s_theta_z =  min(max(l_to_s_theta_z(l), -1), 1)
         if s_theta_z >= 0:
@@ -170,15 +204,13 @@ def callback(path):
 
     # print(omega_z_feature.data)
     feature = Float64MultiArray()
-    tmp_len = len(path.poses)
-    x0 = path.poses[tmp_len-1].pose.position.x
-    y0 = path.poses[tmp_len-1].pose.position.y
-    euler = euler_from_quaternion(path.poses[tmp_len-1].pose.orientation)
+    x0 = path[0].pose.position.x
+    y0 = path[0].pose.position.y
+    euler = euler_from_quaternion(path[0].pose.orientation)
     yaw = normalizedHeadingRad(euler.yaw)
     theta_z0 = yaw
     feature.data = [x0, y0, 0, 0, 0, theta_z0] + v_feature.data + omega_z_feature.data
-    pub.publish(feature)
-    # pl.show()
+    return feature
 
 rospy.init_node('feature_extraction', anonymous=True)
 print('I waiting for service /euler_from_quaternion...')

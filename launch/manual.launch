@@ -1,6 +1,7 @@
 <launch>
  <!-- Turn on hybrid_astar node -->
- <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar" output="screen">
+ <!-- <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar" output="screen"> -->
+ <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar">
  <param name="occ_thre" type="int" value="80" />
  <!-- 0: zero -->
  <!-- 1: weighted-random-traversability -->
