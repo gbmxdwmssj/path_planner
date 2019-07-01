@@ -96,7 +96,7 @@ def callback(features):
                 euler.roll, euler.pitch, euler.yaw)
         whole_path.poses += path.poses
     pub.publish(whole_path)
-    pl.show()
+    # pl.show()
 
 
 
@@ -114,9 +114,9 @@ def calc_predicted_path(feature, x0, y0, z0, theta_x0, theta_y0, theta_z0):
         omega_z_list.append(feature.data[i])
 
     t_to_omega_z = interp1d(t_list, omega_z_list, kind='cubic')
-    t_new = np.linspace(0, t_f - 0.1, 1000)
-    omega_z_new = t_to_omega_z(t_new)
-    pl.plot(t_new, omega_z_new)
+    # t_new = np.linspace(0, t_f - 0.1, 1000)
+    # omega_z_new = t_to_omega_z(t_new)
+    # pl.plot(t_new, omega_z_new)
 
     h = rospy.get_param('/hybrid_astar/dt') # s
     t = 0

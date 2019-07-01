@@ -61,7 +61,7 @@ Visualization Manager:
       Axes Radius: 0.100000001
       Class: rviz/Pose
       Color: 0; 255; 0
-      Enabled: true
+      Enabled: false
       Head Length: 1.5
       Head Radius: 0.5
       Name: Goal
@@ -70,7 +70,7 @@ Visualization Manager:
       Shape: Arrow
       Topic: /move_base_simple/goal
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Axes Length: 1
       Axes Radius: 0.100000001
@@ -157,13 +157,13 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /sPathVehicle
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Arrow Length: 0.300000012
       Axes Length: 0.300000012
@@ -245,11 +245,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 3.16149449
+      Scale: 12.9121952
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 124.456306
-      Y: 122.392372
+      X: 99.2813568
+      Y: 121.087456
     Saved: ~
 Window Geometry:
   Displays:

@@ -136,12 +136,13 @@ def calcFeature(path):
             dis = -dis
         l_f = l_f + dis
     l_list.append(l_f)
-    euler = euler_from_quaternion(path[0].pose.orientation)
+    euler = euler_from_quaternion(path[len(path) - 1].pose.orientation)
     yaw = normalizedHeadingRad(euler.yaw)
     c_theta_z = math.cos(yaw)
     s_theta_z = math.sin(yaw)
     c_theta_z_list.append(c_theta_z)
     s_theta_z_list.append(s_theta_z)
+    print(c_theta_z_list)
     l_to_c_theta_z = interp1d(l_list, c_theta_z_list, kind='quadratic')
     l_to_s_theta_z = interp1d(l_list, s_theta_z_list, kind='quadratic')
     # l_new = np.linspace(0, l_f, 1000)
@@ -189,6 +190,16 @@ def calcFeature(path):
             if k != K - 1 and abs(l_plus) > abs(l_f):
                 l_plus = l_f
 
+            # print('-------------')
+            # print('l')
+            # print(l)
+            # if k == K - 1:
+            #     print('l_minus')
+            #     print(l_minus)
+            # else:
+            #     print('l_plus')
+            #     print(l_plus)
+
             c_theta_z = min(max(l_to_c_theta_z(l), -1), 1)
             s_theta_z =  min(max(l_to_s_theta_z(l), -1), 1)
             if s_theta_z >= 0:
@@ -203,6 +214,8 @@ def calcFeature(path):
                     theta_z_minus = normalizedHeadingRad(math.acos(c_theta_z_minus))
                 else:
                     theta_z_minus = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z_minus)) - bias
+                # print('---theta - minus---')
+                # print(radMinus(theta_z, theta_z_minus))
                 # print(theta_z)
                 # print(theta_z_minus)
                 omega_z = radMinus(theta_z, theta_z_minus) / dt
@@ -213,6 +226,8 @@ def calcFeature(path):
                     theta_z_plus = normalizedHeadingRad(math.acos(c_theta_z_plus))
                 else:
                     theta_z_plus = 2 * math.pi - normalizedHeadingRad(math.acos(c_theta_z_plus)) - bias
+                # print('---plus - theta---')
+                # print(radMinus(theta_z_plus, theta_z))
                 # print(theta_z_plus)
                 # print(theta_z)
                 omega_z = radMinus(theta_z_plus, theta_z) / dt
@@ -221,7 +236,7 @@ def calcFeature(path):
 
         omega_z_feature.data.append(omega_z_sum / omega_z_cnt)
 
-    # print(omega_z_feature.data)
+    print(omega_z_feature.data)
     feature = Float64MultiArray()
     x0 = path[0].pose.position.x
     y0 = path[0].pose.position.y
