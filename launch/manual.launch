@@ -1,12 +1,12 @@
 <launch>
  <!-- Turn on hybrid_astar node -->
- <!-- <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar" output="screen"> -->
- <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar">
+ <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar" output="screen">
+ <!-- <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar"> -->
  <param name="occ_thre" type="int" value="80" />
  <!-- 0: zero -->
  <!-- 1: weighted-random-traversability -->
  <!-- 2: weighted-traversability -->
- <param name="cost_mode" type="int" value="0" />
+ <param name="cost_mode" type="int" value="2" />
  <!-- dis_wei is alwasys 1.0 and you should adjust the other weight factors -->
  <param name="dis_wei" type="double" value="1.0" />
  <param name="occ_wei" type="double" value="30.0" />
@@ -14,8 +14,8 @@
  </node>
 
  <node name="tf_broadcaster" pkg="hybrid_astar" type="tf_broadcaster" />
- <node name="occupancy_server" pkg="grid_map_demos" type="occupancy_server.py" args="$(find hybrid_astar)/maps/occ-map-2019-06-28-17:20:17.yaml" />
- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_astar)/launch/config.rviz" />
+ <node name="occupancy_server" pkg="grid_map_demos" type="occupancy_server.py" args="$(find hybrid_astar)/maps/occ-map-2019-06-25-17:22:14.yaml" />
+ <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_astar)/launch/config.rviz" /> -->
  <node name="euler_from_quaternion" pkg="hybrid_astar" type="euler_from_quaternion.py"  output="screen" />
  <node name="quaternion_from_euler" pkg="hybrid_astar" type="quaternion_from_euler.py"  output="screen" />
  <node name="feature_extraction" pkg="hybrid_astar" type="feature_extraction.py"  output="screen" />
