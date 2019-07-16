@@ -60,19 +60,20 @@ def callback(path):
     ## division
     single_path = []
     paths = []
-    for i in range(len(path.poses) - 1, 0, -1):
+    # for i in range(len(path.poses) - 1, 0, -1):
+    for i in range(len(path.poses) - 1):
         single_path.append(path.poses[i])
         cur_dir = path.poses[i].header.frame_id
-        next_dir = path.poses[i-1].header.frame_id
+        next_dir = path.poses[i+1].header.frame_id
         if cur_dir != next_dir:
             if len(single_path) >= 2:
                 paths.append(single_path)
             single_path = []
-    single_path.append(path.poses[0])
+    single_path.append(path.poses[-1])
     if len(single_path) >= 2:
         paths.append(single_path)
-    # print('number of paths:')
-    # print(len(paths))
+    print('number of paths:')
+    print(len(paths))
 
     fea_list = []
     dims = []
@@ -96,19 +97,19 @@ def callback(path):
 def calcFeature(path):
     if path[0].header.frame_id == 'forward':
         print('forward!')
-        v_0 = 0.0 # m/s
+        v_0 = 3.0 # m/s
         a_0 = 2.0 # m/s^2
         v_tra = 3.0
         a_f = -2.0
-        v_f = 0.0
+        v_f = 3.0
         t_f = None
     else:
         print('reverse!')
-        v_0 = 0.0 # m/s
+        v_0 = -3.0 # m/s
         a_0 = -2.0 # m/s^2
         v_tra = -3.0
         a_f = 2.0
-        v_f = 0.0
+        v_f = -3.0
         t_f = None
 
     ## compute the lenght of the path
@@ -132,19 +133,22 @@ def calcFeature(path):
         dx = x - path[i+1].pose.position.x
         dy = y - path[i+1].pose.position.y
         dis = math.sqrt(dx*dx + dy*dy)
+        # print(dis)
         if v_tra < 0:
             dis = -dis
         l_f = l_f + dis
     l_list.append(l_f)
+    # print('l_f_l_f_l_f_l_f_l_f_l_f_l_f')
+    # print(l_list)
     euler = euler_from_quaternion(path[len(path) - 1].pose.orientation)
     yaw = normalizedHeadingRad(euler.yaw)
     c_theta_z = math.cos(yaw)
     s_theta_z = math.sin(yaw)
     c_theta_z_list.append(c_theta_z)
     s_theta_z_list.append(s_theta_z)
-    print(c_theta_z_list)
-    l_to_c_theta_z = interp1d(l_list, c_theta_z_list, kind='quadratic')
-    l_to_s_theta_z = interp1d(l_list, s_theta_z_list, kind='quadratic')
+    # print(c_theta_z_list)
+    l_to_c_theta_z = interp1d(l_list, c_theta_z_list, kind='slinear')
+    l_to_s_theta_z = interp1d(l_list, s_theta_z_list, kind='slinear')
     # l_new = np.linspace(0, l_f, 1000)
     # c_theta_z_new = l_to_c_theta_z(l_new)
     # pl.plot(l_new, c_theta_z_new)
@@ -161,7 +165,7 @@ def calcFeature(path):
 
     # K = 19
     # Delta_t = t_f / (K - 1)
-    Delta_t = 0.5 # s
+    Delta_t = 1.0 # s
     K = int(t_f / Delta_t) + 1
     print('K:')
     print(K)
@@ -176,7 +180,8 @@ def calcFeature(path):
         t_center = k * Delta_t
         omega_z_sum = 0.0
         omega_z_cnt = 0
-        for t in np.arange(t_center-t_wide*dt, t_center+t_wide*dt, dt):
+        # for t in np.arange(t_center-t_wide*dt, t_center+t_wide*dt, dt):
+        for t in np.arange(t_center, t_center+dt, dt):
             l = t_to_l(t, v_feature)
             if k == K - 1:
                 l_minus = t_to_l(t - dt, v_feature)
@@ -191,8 +196,8 @@ def calcFeature(path):
                 l_plus = l_f
 
             # print('-------------')
-            # print('l')
-            # print(l)
+            # print('l_f')
+            # print(l_f)
             # if k == K - 1:
             #     print('l_minus')
             #     print(l_minus)
@@ -236,7 +241,7 @@ def calcFeature(path):
 
         omega_z_feature.data.append(omega_z_sum / omega_z_cnt)
 
-    print(omega_z_feature.data)
+    # print(omega_z_feature.data)
     feature = Float64MultiArray()
     x0 = path[0].pose.position.x
     y0 = path[0].pose.position.y
@@ -250,7 +255,7 @@ rospy.init_node('feature_extraction', anonymous=True)
 print('I waiting for service /euler_from_quaternion...')
 rospy.wait_for_service('/euler_from_quaternion')
 print('Service /euler_from_quaternion is availiable!')
-rospy.Subscriber('/sPath', Path, callback)
+rospy.Subscriber('/oPath', Path, callback)
 pub = rospy.Publisher('/path_feature', Float64MultiArray, queue_size=10)
 rospy.spin()
 

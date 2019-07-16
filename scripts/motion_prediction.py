@@ -9,6 +9,7 @@ from scipy.interpolate import interp1d
 from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
 from hybrid_astar.srv import *
+import random
 
 
 
@@ -29,6 +30,8 @@ def normalizedHeadingRad(theta_z):
     return theta_z - 2.0 * math.pi * (int)(theta_z / (2.0 * math.pi))
 
 def f(s, t, v, omega_z):
+    # v = v * (1.1 - 0.2 * random.random())
+    # omega_z = omega_z * (1.5 - 1.0 * random.random())
     c_x = math.cos(s[3])
     s_x = math.sin(s[3])
     c_y = math.cos(s[4])
@@ -83,7 +86,8 @@ def callback(features):
     for fea in fea_list:
         feature = Float64MultiArray()
         feature.data = fea
-        if path is None:
+        # if path is None:
+        if True:
             path = calc_predicted_path(feature,
                 feature.data[0], feature.data[1], feature.data[2],
                 feature.data[3], feature.data[4], feature.data[5])
@@ -113,7 +117,7 @@ def calc_predicted_path(feature, x0, y0, z0, theta_x0, theta_y0, theta_z0):
     for i in range(12, len(feature.data), 1):
         omega_z_list.append(feature.data[i])
 
-    t_to_omega_z = interp1d(t_list, omega_z_list, kind='cubic')
+    t_to_omega_z = interp1d(t_list, omega_z_list, kind='slinear')
     # t_new = np.linspace(0, t_f - 0.1, 1000)
     # omega_z_new = t_to_omega_z(t_new)
     # pl.plot(t_new, omega_z_new)
@@ -125,10 +129,14 @@ def calc_predicted_path(feature, x0, y0, z0, theta_x0, theta_y0, theta_z0):
     s_list.append(s)
     while t <= t_f:
         arr = f(s, t, t_to_v(t, feature), t_to_omega_z(t))
-        # print(arr[0,0]*h)
         s = [s[0] + arr[0,0]*h, s[1] + arr[1,0]*h, s[2] + 0,
              s[3] + 0,          s[4] + 0,          normalizedHeadingRad(s[5] + arr[2,0]*h)]
-        s_list.append(s)
+        s_tmp = s.copy()
+        # if random.random() < 0.2:
+        #     s_tmp[0] = s_tmp[0] + (0.3 - 0.6 * random.random())
+        #     s_tmp[1] = s_tmp[1] + (0.3 - 0.6 * random.random())
+        #     s_tmp[5] = s_tmp[5] + (0.1 - 0.2 * random.random())
+        s_list.append(s_tmp)
         t = t + h
     # print(s_list)
 

@@ -46,7 +46,7 @@ void Path::clear() {
 // __________
 // TRACE PATH
 void Path::updatePath(std::vector<Node3D> nodePath) {
-  path.header.stamp = ros::Time::now();
+  // path.header.stamp = ros::Time::now();
   int k = 0;
 
   for (size_t i = 0; i < nodePath.size(); ++i) {
