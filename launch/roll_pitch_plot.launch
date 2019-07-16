@@ -1,0 +1,5 @@
+<launch>
+ <node name="roll_pitch_plot" pkg="hybrid_astar" type="roll_pitch_plot.py" output="screen" />
+ <node name="euler_from_quaternion" pkg="hybrid_astar" type="euler_from_quaternion.py" output="screen" />
+ <node name="quaternion_from_euler" pkg="hybrid_astar" type="quaternion_from_euler.py" output="screen" />
+</launch>
