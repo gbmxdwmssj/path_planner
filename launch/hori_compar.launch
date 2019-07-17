@@ -1,18 +1,6 @@
 <launch>
  <!-- Turn on hybrid_astar node -->
- <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar" output="screen">
- <!-- <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar"> -->
- <param name="occ_thre" type="int" value="20" />
- <!-- 0: zero -->
- <!-- 1: weighted-random-traversability -->
- <!-- 2: weighted-traversability -->
- <!-- <param name="cost_mode" type="int" value="1" /> -->
- <param name="cost_mode" type="int" value="2" />
- <!-- dis_wei is alwasys 1.0 and you should adjust the other weight factors -->
- <param name="dis_wei" type="double" value="1.0" />
- <!-- <param name="occ_wei" type="double" value="10.0" /> -->
- <param name="occ_wei" type="double" value="2.0" />
- <param name="dt" type="double" value="0.1" />
+ <node name="hori_compar" pkg="hybrid_astar" type="hori_compar.py" output="screen">
  </node>
 
  <node name="tf_broadcaster" pkg="hybrid_astar" type="tf_broadcaster" />

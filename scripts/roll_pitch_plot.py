@@ -111,56 +111,15 @@ while (s_path is None or o_path is None or p_path is None or ele_map is None or 
     print('Wait for paths and map!')
     time.sleep(0.5)
 
-# if not rospy.core.is_shutdown():
-#     print('Draw!')
-#     print(fil_map.data[2])
-#     xs = []
-#     ys = []
-#     w = ele_map.info.width
-#     h = ele_map.info.height
-#     reso = ele_map.info.resolution
-#     eles = []
-#     ls = []
-#     l = 0.0
-#     for i in range(len(s_path.poses)-1, -1, -1):
-#         ls.append(l)
-#         x = s_path.poses[i].pose.position.x
-#         y = s_path.poses[i].pose.position.y
-#         if i != 0:
-#             dx = s_path.poses[i-1].pose.position.x - x
-#             dy = s_path.poses[i-1].pose.position.y - y
-#         else:
-#             dx = 0
-#             dy = 0
-#         dis = math.sqrt(dx*dx + dy*dy)
-#         l += dis
-#         xs.append(x)
-#         ys.append(y)
-#         print([x,y])
-#         x *= 0.02
-#         y *= 0.02
-#         x = int(x / reso)
-#         y = int(y / reso)
-#         ele = ele_map.data[y*w+x]
-#         ele = (ele - ele_range_in_occ[0]) / (ele_range_in_occ[1] - ele_range_in_occ[0])
-#         eles.append(ele)
-#         print(ele)
 
-#     print(ls)
-#     plt.figure()
-#     plt.plot(ls, eles)
-#     plt.show()
-
-# else:
-#     print('Shutdown!')
 
 init_ele = None
 euler_from_quaternion = rospy.ServiceProxy('/euler_from_quaternion', EulerFromQuaternion)
 if not rospy.core.is_shutdown():
     print('Draw!')
-    print(fil_map.data[2].layout)
-    print(min(fil_map.data[2].data))
-    print(max(fil_map.data[2].data))
+    print(fil_map.data[0].layout)
+    print(min(fil_map.data[0].data))
+    print(max(fil_map.data[0].data))
     print(fil_map.info)
     xs = []
     ys = []
@@ -177,11 +136,17 @@ if not rospy.core.is_shutdown():
     yaws = []
     W = 1.7
     L = 2.0
-    for i in range(len(s_path.poses)-1, -1, -1):
+
+    path = s_path
+
+    # path = o_path
+    # path.poses.reverse()
+
+    for i in range(len(path.poses)-1, -1, -1):
         ls.append(l)
-        x = s_path.poses[i].pose.position.x
-        y = s_path.poses[i].pose.position.y
-        euler = euler_from_quaternion(s_path.poses[i].pose.orientation)
+        x = path.poses[i].pose.position.x
+        y = path.poses[i].pose.position.y
+        euler = euler_from_quaternion(path.poses[i].pose.orientation)
         euler.yaw -= 0.25 * math.pi
         euler.yaw = -euler.yaw + 0.5 * math.pi
         yaw = normalizedHeadingRad(euler.yaw)
@@ -189,8 +154,8 @@ if not rospy.core.is_shutdown():
         cy = math.cos(yaw)
         sy = math.sin(yaw)
         if i != 0:
-            dx = s_path.poses[i-1].pose.position.x - x
-            dy = s_path.poses[i-1].pose.position.y - y
+            dx = path.poses[i-1].pose.position.x - x
+            dy = path.poses[i-1].pose.position.y - y
         else:
             dx = 0
             dy = 0
@@ -215,7 +180,7 @@ if not rospy.core.is_shutdown():
         ytmp *= 0.02
         xtmp = int(xtmp / reso)
         ytmp = int(ytmp / reso)
-        ele = fil_map.data[2].data[(h-ytmp)*w+(h-xtmp)]
+        ele = fil_map.data[0].data[(h-ytmp)*w+(h-xtmp)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
         ele = ele_meter_range[0] + ele * (ele_meter_range[1] - ele_meter_range[0])
         pt_rf += [ele]
@@ -233,7 +198,7 @@ if not rospy.core.is_shutdown():
         ytmp *= 0.02
         xtmp = int(xtmp / reso)
         ytmp = int(ytmp / reso)
-        ele = fil_map.data[2].data[(h-ytmp)*w+(h-xtmp)]
+        ele = fil_map.data[0].data[(h-ytmp)*w+(h-xtmp)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
         ele = ele_meter_range[0] + ele * (ele_meter_range[1] - ele_meter_range[0])
         pt_lf += [ele]
@@ -251,7 +216,7 @@ if not rospy.core.is_shutdown():
         ytmp *= 0.02
         xtmp = int(xtmp / reso)
         ytmp = int(ytmp / reso)
-        ele = fil_map.data[2].data[(h-ytmp)*w+(h-xtmp)]
+        ele = fil_map.data[0].data[(h-ytmp)*w+(h-xtmp)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
         ele = ele_meter_range[0] + ele * (ele_meter_range[1] - ele_meter_range[0])
         pt_lb += [ele]
@@ -269,7 +234,7 @@ if not rospy.core.is_shutdown():
         ytmp *= 0.02
         xtmp = int(xtmp / reso)
         ytmp = int(ytmp / reso)
-        ele = fil_map.data[2].data[(h-ytmp)*w+(h-xtmp)]
+        ele = fil_map.data[0].data[(h-ytmp)*w+(h-xtmp)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
         ele = ele_meter_range[0] + ele * (ele_meter_range[1] - ele_meter_range[0])
         pt_rb += [ele]
@@ -302,10 +267,10 @@ if not rospy.core.is_shutdown():
         y *= 0.02
         x = int(x / reso)
         y = int(y / reso)
-        ele = fil_map.data[2].data[(h-y)*w+(h-x)]
+        ele = fil_map.data[0].data[(h-y)*w+(h-x)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
 
-    with open('/home/kai/roll_pitch_sheet.csv', 'w', newline='') as t_file:
+    with open('/home/kai/ori_roll_pitch_sheet.csv', 'w', newline='') as t_file:
         csv_writer = csv.writer(t_file)
         csv_writer.writerow(['l', 'roll', 'pitch'])
         for i in range(len(ls)):

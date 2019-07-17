@@ -49,6 +49,8 @@ void Planner::initializeLookups() {
 //                                                MAP
 //###################################################
 void Planner::setMap(const nav_msgs::OccupancyGrid::Ptr map) {
+  validMap = true;
+  std::cout << "I am seeing the map..." << std::endl;
   if (Constants::coutDEBUG) {
     std::cout << "I am seeing the map..." << std::endl;
   }
@@ -116,17 +118,25 @@ void Planner::setStart(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr&
 
   std::cout << "I am seeing a new start x:" << x << " y:" << y << " t:" << Helper::toDeg(t) << std::endl;
 
-  if (grid->info.height >= y && y >= 0 && grid->info.width >= x && x >= 0) {
-    validStart = true;
-    start = *initial;
+  // if (grid->info.height >= y && y >= 0 && grid->info.width >= x && x >= 0) {
+  //   validStart = true;
+  //   start = *initial;
 
-    if (Constants::manual) { plan();}
+  //   if (Constants::manual) { plan();}
 
-    // publish start for RViz
-    pubStart.publish(startN);
-  } else {
-    std::cout << "invalid start x:" << x << " y:" << y << " t:" << Helper::toDeg(t) << std::endl;
-  }
+  //   // publish start for RViz
+  //   pubStart.publish(startN);
+  // } else {
+  //   std::cout << "invalid start x:" << x << " y:" << y << " t:" << Helper::toDeg(t) << std::endl;
+  // }
+
+  validStart = true;
+  start = *initial;
+
+  if (Constants::manual) { plan();}
+
+  // publish start for RViz
+  pubStart.publish(startN);
 }
 
 //###################################################
@@ -140,15 +150,20 @@ void Planner::setGoal(const geometry_msgs::PoseStamped::ConstPtr& end) {
 
   std::cout << "I am seeing a new goal x:" << x << " y:" << y << " t:" << Helper::toDeg(t) << std::endl;
 
-  if (grid->info.height >= y && y >= 0 && grid->info.width >= x && x >= 0) {
-    validGoal = true;
-    goal = *end;
+  // if (grid->info.height >= y && y >= 0 && grid->info.width >= x && x >= 0) {
+  //   validGoal = true;
+  //   goal = *end;
 
-    if (Constants::manual) { plan();}
+  //   if (Constants::manual) { plan();}
 
-  } else {
-    std::cout << "invalid goal x:" << x << " y:" << y << " t:" << Helper::toDeg(t) << std::endl;
-  }
+  // } else {
+  //   std::cout << "invalid goal x:" << x << " y:" << y << " t:" << Helper::toDeg(t) << std::endl;
+  // }
+
+  validGoal = true;
+  goal = *end;
+
+  if (Constants::manual) { plan();}
 }
 
 //###################################################
@@ -156,7 +171,8 @@ void Planner::setGoal(const geometry_msgs::PoseStamped::ConstPtr& end) {
 //###################################################
 void Planner::plan() {
   // if a start as well as goal are defined go ahead and plan
-  if (validStart && validGoal) {
+  if (validStart && validGoal && validMap) {
+    printf("Process a start, a goal and a map!\n");
 
     // ___________________________
     // LISTS ALLOWCATED ROW MAJOR ORDER
