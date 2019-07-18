@@ -26,6 +26,11 @@ from matplotlib.pyplot import MultipleLocator
 s_path = None
 o_path = None
 p_path = None
+
+NoTS_path = None
+TS_NoSus_path = None
+TS_Sus_path = None
+
 ele_map = None
 fil_map = None
 sgn = lambda x: 1 if x > 0 else -1 if x < 0 else 0
@@ -73,6 +78,24 @@ def pCallback(path):
 
 
 
+def NoTSCallback(path):
+    global NoTS_path
+    NoTS_path = path
+
+
+
+def TS_NoSus_Callback(path):
+    global TS_NoSus_path
+    TS_NoSus_path = path
+
+
+
+def TS_Sus_Callback(path):
+    global TS_Sus_path
+    TS_Sus_path = path
+
+
+
 def eleCallback(map):
     global ele_map
     ele_map = map
@@ -99,6 +122,11 @@ rospy.init_node('traversability_plot', anonymous=True)
 rospy.Subscriber('/sPath', Path, sCallback)
 rospy.Subscriber('/oPath', Path, oCallback)
 rospy.Subscriber('/predicted_path', Path, pCallback)
+
+rospy.Subscriber('/NoTS_oPath', Path, NoTSCallback)
+rospy.Subscriber('/TS_NoSus_oPath', Path, TS_NoSus_Callback)
+rospy.Subscriber('/TS_Sus_oPath', Path, TS_Sus_Callback)
+
 rospy.Subscriber('/grid_map_visualization/elevation_grid', OccupancyGrid, eleCallback)
 rospy.Subscriber('/grid_map_filter_demo/filtered_map', GridMap, filCallback)
 # print('I waiting for service /euler_from_quaternion...')
@@ -107,8 +135,14 @@ rospy.Subscriber('/grid_map_filter_demo/filtered_map', GridMap, filCallback)
 
 major_locator=MultipleLocator(0.25)
 
-while (s_path is None or o_path is None or p_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
-    print('Wait for paths and map!')
+# while (s_path is None or o_path is None or p_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
+#     print('Wait for paths and map!')
+#     time.sleep(0.5)
+
+
+
+print('Missing the path of horizontal comparison...')
+while (NoTS_path is None or TS_NoSus_path is None or TS_Sus_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
     time.sleep(0.5)
 
 
@@ -140,8 +174,17 @@ if not rospy.core.is_shutdown():
 
     # path = s_path
 
-    path = o_path
+    # path = o_path
+    # path.poses.reverse()
+
+    # path = NoTS_path
+    # path.poses.reverse()
+
+    path = TS_NoSus_path
     path.poses.reverse()
+
+    # path = TS_Sus_path
+    # path.poses.reverse()
 
     for i in range(len(path.poses)-1, -1, -1):
         ls.append(l)

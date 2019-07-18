@@ -65,10 +65,10 @@ def getLength(path):
 def getKnots(path):
     x_list = []
     y_list = []
-    min_knot_num = 7
+    min_knot_num = 10
     min_dis_step = 5.0 # m
-    max_dis_step = getLength(path) / (min_knot_num - 1) # m
-    # max_dis_step = 40.0 # m
+    # max_dis_step = getLength(path) / (min_knot_num - 1) # m
+    max_dis_step = 37.0 # m
     min_idx_step = int(min_dis_step / getDisReso(path))
     max_idx_step = int(max_dis_step / getDisReso(path))
     min_idx_step = max(1, min_idx_step)

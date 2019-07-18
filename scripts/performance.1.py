@@ -143,22 +143,9 @@ def getSingleTf(path):
         l_list.append(l_f)
         x = path[i].pose.position.x
         y = path[i].pose.position.y
-        x1 = path[i-1].pose.position.x
-        y1 = path[i-1].pose.position.y
-        dx = x1 - x
-        dy = y1 - y
-
-        z = getMapValue(fil_map, 2, x, y)
-        z = (z - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
-        z = ele_meter_range[0] + z * (ele_meter_range[1] - ele_meter_range[0])
-
-        z1 = getMapValue(fil_map, 2, x1, y1)
-        z1 = (z1 - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
-        z1 = ele_meter_range[0] + z1 * (ele_meter_range[1] - ele_meter_range[0])
-
-        dz = z1 - z
-
-        dis = math.sqrt(dx*dx + dy*dy + dz*dz)
+        dx = path[i-1].pose.position.x - x
+        dy = path[i-1].pose.position.y - y
+        dis = math.sqrt(dx*dx + dy*dy)
         if v_tra < 0:
             dis = -dis
         l_f = l_f + dis
@@ -247,9 +234,9 @@ if not rospy.core.is_shutdown():
     print('Draw!')
     xs = []
     ys = []
-    # w = ele_map.info.width
-    # h = ele_map.info.height
-    # reso = ele_map.info.resolution
+    w = ele_map.info.width
+    h = ele_map.info.height
+    reso = ele_map.info.resolution
     eles = []
     ls = []
     l = 0.0
@@ -260,8 +247,6 @@ if not rospy.core.is_shutdown():
     L = 2.0
     smooth_cost = 0.0
 
-    reso = fil_map.info.resolution
-
     # path = s_path
 
     # path = o_path
@@ -270,20 +255,19 @@ if not rospy.core.is_shutdown():
     # path = p_path
     # path.poses.reverse()
 
-    # path = NoTS_path
-    # path.poses.reverse()
+    path = NoTS_path
+    path.poses.reverse()
 
     # path = TS_NoSus_path
     # path.poses.reverse()
 
-    path = TS_Sus_path
-    path.poses.reverse()
+    # path = TS_Sus_path
+    # path.poses.reverse()
 
-    v_cost = 0.35
-    omega_z_cost = 0.1
-    a_cost = 0.2
-    alpha_z_cost = 0.03
-    runtime = 4.217 # s
+    v_cost = 0.7
+    omega_z_cost = 0.0
+    a_cost = 0.35
+    alpha_z_cost = 0.0
 
     traversability = 0.0
     for i in range(len(path.poses)-2, 0, -1):
@@ -294,32 +278,16 @@ if not rospy.core.is_shutdown():
         yi = path.poses[i].pose.position.y
         xip1 = path.poses[i-1].pose.position.x
         yip1 = path.poses[i-1].pose.position.y
-
-        zim1 = getMapValue(fil_map, 2, xim1, yim1)
-        zim1 = (zim1 - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
-        zim1 = ele_meter_range[0] + zim1 * (ele_meter_range[1] - ele_meter_range[0])
-
-        zi = getMapValue(fil_map, 2, xi, yi)
-        zi = (zi - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
-        zi = ele_meter_range[0] + zi * (ele_meter_range[1] - ele_meter_range[0])
-
-        zip1 = getMapValue(fil_map, 2, xip1, yip1)
-        zip1 = (zip1 - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
-        zip1 = ele_meter_range[0] + zip1 * (ele_meter_range[1] - ele_meter_range[0])
-
         vec_x = xip1 - 2.0 * xi + xim1
         vec_y = yip1 - 2.0 * yi + yim1
-        vec_z = zip1 - 2.0 * zi + zim1
-        smooth_cost += vec_x*vec_x + vec_y*vec_y + vec_z*vec_z
+        smooth_cost += vec_x*vec_x + vec_y*vec_y
         if i != 0:
             dx = xip1 - xi
             dy = yip1 - yi
-            dz = zip1 - zi
         else:
             dx = 0
             dy = 0
-            dz = 0
-        dis = math.sqrt(dx*dx + dy*dy + dz*dz)
+        dis = math.sqrt(dx*dx + dy*dy)
         l += dis
 
         traversability += getMapValue(fil_map, 10, xi, yi)
@@ -328,16 +296,9 @@ if not rospy.core.is_shutdown():
     yi = path.poses[-1].pose.position.y
     xip1 = path.poses[-2].pose.position.x
     yip1 = path.poses[-2].pose.position.y
-    zi = getMapValue(fil_map, 2, xi, yi)
-    zi = (zi - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
-    zi = ele_meter_range[0] + zi * (ele_meter_range[1] - ele_meter_range[0])
-    zip1 = getMapValue(fil_map, 2, xip1, yip1)
-    zip1 = (zip1 - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
-    zip1 = ele_meter_range[0] + zip1 * (ele_meter_range[1] - ele_meter_range[0])
     dx = xip1 - xi
     dy = yip1 - yi
-    dz = zip1 - zi
-    l += math.sqrt(dx*dx + dy*dy + dz*dz)
+    l += math.sqrt(dx*dx + dy*dy)
     print('l:', l)
 
     traversability += getMapValue(fil_map, 10, xi, yi)
@@ -354,10 +315,12 @@ if not rospy.core.is_shutdown():
     t_f = getTf(path)
     print('t_f:', t_f)
 
+    runtime = 2.220 # s
+
     print('traversability:', traversability)
 
     l_cost = l / 500.0
-    nor_smooth_cost = smooth_cost / 0.01
+    nor_smooth_cost = smooth_cost / 0.0001
     obs_cost = 1.0 / min_obs_dis
     t_f_cost = t_f / 150.0
     traversability_cost = 1.0 - traversability

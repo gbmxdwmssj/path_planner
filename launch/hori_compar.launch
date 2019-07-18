@@ -4,7 +4,7 @@
  </node>
 
  <node name="tf_broadcaster" pkg="hybrid_astar" type="tf_broadcaster" />
- <node name="occupancy_server" pkg="grid_map_demos" type="occupancy_server.py" args="$(find hybrid_astar)/maps/occ-map-2019-07-17-10:42:18.yaml" />
+ <node name="occupancy_server" pkg="grid_map_demos" type="occupancy_server.py" args="$(find hybrid_astar)/maps/occ-map-2019-07-18-19:54:41.yaml" />
  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_astar)/launch/hori_compar.rviz" />
  <node name="spline" pkg="hybrid_astar" type="spline.py"  output="screen" />
  <node name="euler_from_quaternion" pkg="hybrid_astar" type="euler_from_quaternion.py"  output="screen" />
