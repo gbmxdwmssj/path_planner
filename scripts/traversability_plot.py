@@ -162,7 +162,7 @@ if not rospy.core.is_shutdown():
         y *= 0.02
         x = int(x / reso)
         y = int(y / reso)
-        tra = fil_map.data[10].data[(h-y)*w+(h-x)]
+        tra = fil_map.data[10].data[(h-y)*w+(w-x)]
         tras.append(tra)
 
     with open('/home/kai/traversability_sheet.csv', 'w', newline='') as t_file:

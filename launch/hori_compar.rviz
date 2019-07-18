@@ -172,7 +172,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz/Path
       Color: 170; 0; 0
-      Enabled: true
+      Enabled: false
       Head Diameter: 0
       Head Length: 0
       Length: 0.300000012
@@ -190,12 +190,12 @@ Visualization Manager:
       Shaft Length: 1
       Topic: /sPath
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
       Color: 0; 170; 0
-      Enabled: true
+      Enabled: false
       Head Diameter: 0
       Head Length: 0
       Length: 0.300000012
@@ -213,12 +213,12 @@ Visualization Manager:
       Shaft Length: 1
       Topic: /oPath
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
       Color: 0; 0; 170
-      Enabled: true
+      Enabled: false
       Head Diameter: 0
       Head Length: 0
       Length: 0.300000012
@@ -236,7 +236,7 @@ Visualization Manager:
       Shaft Length: 1
       Topic: /predicted_path
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -386,11 +386,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 3.26507306
+      Scale: 3.39186025
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 130.027588
-      Y: 127.711456
+      X: 130.026611
+      Y: 128.017731
     Saved: ~
 Window Geometry:
   Displays:

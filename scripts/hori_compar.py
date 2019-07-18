@@ -184,39 +184,70 @@ goal_pub = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=10,
 
 major_locator=MultipleLocator(0.25)
 
-while (start is None or goal is None) and not rospy.core.is_shutdown():
-    print('Wait for start and goal!')
-    time.sleep(0.5)
-
 
 
 init_ele = None
 # euler_from_quaternion = rospy.ServiceProxy('/euler_from_quaternion', EulerFromQuaternion)
-if not rospy.core.is_shutdown():
-    print('Launch!')
-    xs = []
-    ys = []
-    eles = []
-    ls = []
-    l = 0.0
-    rolls = []
-    pitchs = []
-    yaws = []
-    W = 1.7
-    L = 2.0
-    smooth_cost = 0.0
+while not rospy.core.is_shutdown():
 
-    start_pub.publish(start)
-    goal_pub.publish(goal)
-    print('NoTS start!')
-    os.system('rosrun hybrid_astar hybrid_astar')
-    print('NoTS stop!')
+    print('Missing for start or goal...')
+    while (start is None or goal is None) and not rospy.core.is_shutdown():
+        time.sleep(0.5)
 
-    # with open('/home/kai/performance_sheet.csv', 'w', newline='') as t_file:
-    #     csv_writer = csv.writer(t_file)
-    #     csv_writer.writerow(['length', l])
-    #     csv_writer.writerow(['smooth_cost', smooth_cost])
-    #     csv_writer.writerow(['t_f', t_f])
+    if not rospy.core.is_shutdown():
+        print('Launch!')
+        xs = []
+        ys = []
+        eles = []
+        ls = []
+        l = 0.0
+        rolls = []
+        pitchs = []
+        yaws = []
+        W = 1.7
+        L = 2.0
+        smooth_cost = 0.0
+
+        rospy.set_param('/hybrid_astar/s_path_name', '/NoTS_sPath')
+        rospy.set_param('/hybrid_astar/occ_thre', 45)
+        rospy.set_param('/hybrid_astar/cost_mode', 0)
+        rospy.set_param('/hybrid_astar/occ_wei', 0.0)
+        start_pub.publish(start)
+        goal_pub.publish(goal)
+        print('---------- NoTS start! ----------')
+        os.system('rosrun hybrid_astar hybrid_astar')
+        print('NoTS stop!')
+        time.sleep(1.0)
+
+        rospy.set_param('/hybrid_astar/s_path_name', '/TS_NoSus_sPath')
+        rospy.set_param('/hybrid_astar/occ_thre', 25)
+        rospy.set_param('/hybrid_astar/cost_mode', 1)
+        rospy.set_param('/hybrid_astar/occ_wei', 18.0)
+        print('---------- TS_NoSus start! ----------')
+        os.system('rosrun hybrid_astar hybrid_astar')
+        print('TS_NoSus stop!')
+        time.sleep(1.0)
+
+        rospy.set_param('/hybrid_astar/s_path_name', '/TS_Sus_sPath')
+        rospy.set_param('/hybrid_astar/occ_thre', 38)
+        rospy.set_param('/hybrid_astar/cost_mode', 2)
+        rospy.set_param('/hybrid_astar/occ_wei', 1.1)
+        print('---------- TS_Sus start! ----------')
+        os.system('rosrun hybrid_astar hybrid_astar')
+        print('TS_Sus stop!')
+        time.sleep(1.0)
+
+        start = None
+        goal = None
+
+        # with open('/home/kai/performance_sheet.csv', 'w', newline='') as t_file:
+        #     csv_writer = csv.writer(t_file)
+        #     csv_writer.writerow(['length', l])
+        #     csv_writer.writerow(['smooth_cost', smooth_cost])
+        #     csv_writer.writerow(['t_f', t_f])
+
+    else:
+        print('Shutdown!')
 
 else:
     print('Shutdown!')

@@ -172,7 +172,7 @@ def calcFeature(path):
     Delta_t = t_f / (K - 1)
 
     omega_z_feature = Float64MultiArray()
-    dt = rospy.get_param('/hybrid_astar/dt') # s
+    dt = rospy.get_param('/hybrid_astar/dt', 0.1) # s
     bias = 0.000001
     t_wide = 7 # dt
 

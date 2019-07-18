@@ -28,6 +28,12 @@ class Path {
      std::string pathNodesTopic;
      std::string pathVehicleTopic;
 
+   // GET THE PARAMETERS
+   std::string s_path_name = "/sPath";
+   if (!n.getParam("/hybrid_astar/s_path_name", s_path_name)) {
+      s_path_name = "/sPath";
+   }
+
     if (mode == 0) {
       pathTopic = "/path";
       pathNodesTopic = "/pathNodes";
@@ -35,7 +41,7 @@ class Path {
       this->mode = mode;
     }
     else if (mode == 1) {
-      pathTopic = "/sPath";
+      pathTopic = s_path_name;
       pathNodesTopic = "/sPathNodes";
       pathVehicleTopic = "/sPathVehicle";
       this->mode = mode;

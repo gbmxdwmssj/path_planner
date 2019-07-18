@@ -100,6 +100,8 @@ void Planner::setMap(const nav_msgs::OccupancyGrid::Ptr map) {
 
     plan();
   }
+
+  plan();
 }
 
 //###################################################
@@ -325,6 +327,15 @@ void Planner::plan() {
 
     delete [] nodes3D;
     delete [] nodes2D;
+
+    // GET THE PARAMETERS
+    std::string s_path_name = "/sPath";
+    if (!n.getParam("/hybrid_astar/s_path_name", s_path_name)) {
+      s_path_name = "/sPath";
+    }
+    if (s_path_name != "/sPath") {
+      ros::shutdown();
+    }
 
   } else {
     std::cout << "missing goal or start" << std::endl;

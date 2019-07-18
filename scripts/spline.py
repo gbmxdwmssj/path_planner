@@ -65,10 +65,10 @@ def getLength(path):
 def getKnots(path):
     x_list = []
     y_list = []
-    min_knot_num = 4
+    min_knot_num = 7
     min_dis_step = 5.0 # m
-    # max_dis_step = getLength(path) / (min_knot_num - 1) # m
-    max_dis_step = 40.0 # m
+    max_dis_step = getLength(path) / (min_knot_num - 1) # m
+    # max_dis_step = 40.0 # m
     min_idx_step = int(min_dis_step / getDisReso(path))
     max_idx_step = int(max_dis_step / getDisReso(path))
     min_idx_step = max(1, min_idx_step)
@@ -195,7 +195,32 @@ def callback(path):
         optim_path = updateYaw(optim_path)
         whole_path.poses += optim_path.poses
 
-    pub.publish(whole_path)
+    s_path_name = rospy.get_param('/hybrid_astar/s_path_name', '/sPath')
+    if s_path_name == '/sPath':
+        pub.publish(whole_path)
+    elif s_path_name == '/NoTS_sPath':
+        NoTS_pub.publish(whole_path)
+    elif s_path_name == '/TS_NoSus_sPath':
+        TS_NoSus_pub.publish(whole_path)
+    elif s_path_name == '/TS_Sus_sPath':
+        TS_Sus_pub.publish(whole_path)
+    else:
+        pub.publish(whole_path)
+
+
+
+def NoTSCallback(path):
+    callback(path)
+
+
+
+def TS_NoSus_Callback(path):
+    callback(path)
+
+
+
+def TS_Sus_Callback(path):
+    callback(path)
 
 
 
@@ -254,8 +279,16 @@ def callback(path):
 
 
 rospy.init_node('spline', anonymous=True)
+
 rospy.Subscriber('/sPath', Path, callback)
+rospy.Subscriber('/NoTS_sPath', Path, NoTSCallback)
+rospy.Subscriber('/TS_NoSus_sPath', Path, TS_NoSus_Callback)
+rospy.Subscriber('/TS_Sus_sPath', Path, TS_Sus_Callback)
+
 pub = rospy.Publisher('/oPath', Path, queue_size=10)
+NoTS_pub = rospy.Publisher('/NoTS_oPath', Path, queue_size=10)
+TS_NoSus_pub = rospy.Publisher('/TS_NoSus_oPath', Path, queue_size=10)
+TS_Sus_pub = rospy.Publisher('/TS_Sus_oPath', Path, queue_size=10)
 # rospy.wait_for_service('/quaternion_from_euler')
 
 # reso = 0.2

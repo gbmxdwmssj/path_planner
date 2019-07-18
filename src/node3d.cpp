@@ -108,7 +108,8 @@ void Node3D::updateG(int cost_mode, nav_msgs::OccupancyGrid::Ptr grid, double di
     int occ = grid->data[Y * grid->info.width + X]; // occ_value $\in$ [0, 100]
     double normal_occ = dx[0] * (occ - 0.0) / (100.0 - 0.0);
     double wei_normal_occ = occ_wei * normal_occ;
-    double rand_num = 1.0 + (0.3 * rand() / RAND_MAX); // [1.0, 1.3]
+    // double rand_num = 1.0 + (0.3 * rand() / RAND_MAX); // [1.0, 1.3]
+    double rand_num = 1.0;
     double rand_wei_normal_occ = rand_num * wei_normal_occ;
     // forward driving
     if (prim < 3) {

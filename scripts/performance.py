@@ -26,6 +26,11 @@ from matplotlib.pyplot import MultipleLocator
 s_path = None
 o_path = None
 p_path = None
+
+NoTS_path = None
+TS_NoSus_path = None
+TS_Sus_path = None
+
 ele_map = None
 fil_map = None
 sgn = lambda x: 1 if x > 0 else -1 if x < 0 else 0
@@ -70,6 +75,24 @@ def oCallback(path):
 def pCallback(path):
     global p_path
     p_path = path
+
+
+
+def NoTSCallback(path):
+    global NoTS_path
+    NoTS_path = path
+
+
+
+def TS_NoSus_Callback(path):
+    global TS_NoSus_path
+    TS_NoSus_path = path
+
+
+
+def TS_Sus_Callback(path):
+    global TS_Sus_path
+    TS_Sus_path = path
 
 
 
@@ -163,10 +186,28 @@ def getTf(path):
 
 
 
+def getMapValue(in_map, layer, x, y):
+    max_x = in_map.info.length_x
+    max_y = in_map.info.length_y
+    w = int(max_x / in_map.info.resolution + 0.5)
+    h = int(max_y / in_map.info.resolution + 0.5)
+    x *= 0.02
+    y *= 0.02
+    x = int(x / reso)
+    y = int(y / reso)
+    return in_map.data[layer].data[(h-y)*w+(w-x)]
+
+
+
 rospy.init_node('performance', anonymous=True)
 rospy.Subscriber('/sPath', Path, sCallback)
 rospy.Subscriber('/oPath', Path, oCallback)
 rospy.Subscriber('/predicted_path', Path, pCallback)
+
+rospy.Subscriber('/NoTS_oPath', Path, NoTSCallback)
+rospy.Subscriber('/TS_NoSus_oPath', Path, TS_NoSus_Callback)
+rospy.Subscriber('/TS_Sus_oPath', Path, TS_Sus_Callback)
+
 rospy.Subscriber('/grid_map_visualization/elevation_grid', OccupancyGrid, eleCallback)
 rospy.Subscriber('/grid_map_filter_demo/filtered_map', GridMap, filCallback)
 # print('I waiting for service /euler_from_quaternion...')
@@ -175,8 +216,14 @@ rospy.Subscriber('/grid_map_filter_demo/filtered_map', GridMap, filCallback)
 
 major_locator=MultipleLocator(0.25)
 
-while (s_path is None or o_path is None or p_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
-    print('Wait for paths and map!')
+# while (s_path is None or o_path is None or p_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
+#     print('Wait for paths and map!')
+#     time.sleep(0.5)
+
+
+
+print('Missing the path of horizontal comparison...')
+while (NoTS_path is None or TS_NoSus_path is None or TS_Sus_path is None or fil_map is None) and not rospy.core.is_shutdown():
     time.sleep(0.5)
 
 
@@ -185,16 +232,10 @@ init_ele = None
 # euler_from_quaternion = rospy.ServiceProxy('/euler_from_quaternion', EulerFromQuaternion)
 if not rospy.core.is_shutdown():
     print('Draw!')
-    # print(fil_map.data[2].layout)
-    # print(min(fil_map.data[2].data))
-    # print(max(fil_map.data[2].data))
-    # print(fil_map.info)
     xs = []
     ys = []
     w = ele_map.info.width
     h = ele_map.info.height
-    # print(w)
-    # print(h)
     reso = ele_map.info.resolution
     eles = []
     ls = []
@@ -208,12 +249,27 @@ if not rospy.core.is_shutdown():
 
     # path = s_path
 
-    path = o_path
-    path.poses.reverse()
+    # path = o_path
+    # path.poses.reverse()
 
     # path = p_path
     # path.poses.reverse()
 
+    path = NoTS_path
+    path.poses.reverse()
+
+    # path = TS_NoSus_path
+    # path.poses.reverse()
+
+    # path = TS_Sus_path
+    # path.poses.reverse()
+
+    v_cost = 0.7
+    omega_z_cost = 0.0
+    a_cost = 0.35
+    alpha_z_cost = 0.0
+
+    traversability = 0.0
     for i in range(len(path.poses)-2, 0, -1):
         ls.append(l)
         xim1 = path.poses[i+1].pose.position.x
@@ -234,6 +290,8 @@ if not rospy.core.is_shutdown():
         dis = math.sqrt(dx*dx + dy*dy)
         l += dis
 
+        traversability += getMapValue(fil_map, 10, xi, yi)
+
     xi = path.poses[-1].pose.position.x
     yi = path.poses[-1].pose.position.y
     xip1 = path.poses[-2].pose.position.x
@@ -243,17 +301,49 @@ if not rospy.core.is_shutdown():
     l += math.sqrt(dx*dx + dy*dy)
     print('l:', l)
 
+    traversability += getMapValue(fil_map, 10, xi, yi)
+    xi = path.poses[0].pose.position.x
+    yi = path.poses[0].pose.position.y
+    traversability += getMapValue(fil_map, 10, xi, yi)
+    traversability /= len(path.poses)
+
     smooth_cost /= len(path.poses)-2
     print('smooth_cost:', smooth_cost)
 
+    min_obs_dis = float('inf')
+
     t_f = getTf(path)
     print('t_f:', t_f)
+
+    runtime = 2.220 # s
+
+    print('traversability:', traversability)
+
+    l_cost = l / 500.0
+    nor_smooth_cost = smooth_cost / 0.0001
+    obs_cost = 1.0 / min_obs_dis
+    t_f_cost = t_f / 150.0
+    traversability_cost = 1.0 - traversability
+
+    group_1_cost = nor_smooth_cost
+    group_2_cost = l_cost + t_f_cost
+    group_3_cost = v_cost + omega_z_cost + a_cost + alpha_z_cost
+    group_4_cost = obs_cost + traversability_cost
+    total_cost = (group_1_cost + group_2_cost + group_3_cost + group_4_cost) / 9.0
 
     with open('/home/kai/performance_sheet.csv', 'w', newline='') as t_file:
         csv_writer = csv.writer(t_file)
         csv_writer.writerow(['length', l])
         csv_writer.writerow(['smooth_cost', smooth_cost])
+        csv_writer.writerow(['min_obs_dis', min_obs_dis])
         csv_writer.writerow(['t_f', t_f])
+        csv_writer.writerow(['runtime', runtime])
+        csv_writer.writerow(['traversability', traversability])
+        csv_writer.writerow(['v_cost', v_cost])
+        csv_writer.writerow(['omega_z_cost', omega_z_cost])
+        csv_writer.writerow(['a_cost', a_cost])
+        csv_writer.writerow(['alpha_z_cost', alpha_z_cost])
+        csv_writer.writerow(['total_cost', total_cost])
 
 else:
     print('Shutdown!')

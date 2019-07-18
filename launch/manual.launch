@@ -3,6 +3,7 @@
  <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar" output="screen">
  <!-- <node name="hybrid_astar" pkg="hybrid_astar" type="hybrid_astar"> -->
  <param name="occ_thre" type="int" value="20" />
+ <param name="s_path_name" type="string" value="/sPath" />
  <!-- 0: zero -->
  <!-- 1: weighted-random-traversability -->
  <!-- 2: weighted-traversability -->

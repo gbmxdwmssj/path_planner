@@ -122,7 +122,7 @@ def calc_predicted_path(feature, x0, y0, z0, theta_x0, theta_y0, theta_z0):
     # omega_z_new = t_to_omega_z(t_new)
     # pl.plot(t_new, omega_z_new)
 
-    h = rospy.get_param('/hybrid_astar/dt') # s
+    h = rospy.get_param('/hybrid_astar/dt', 0.1) # s
     t = 0
     s = [x0, y0, z0, theta_x0, theta_y0, theta_z0]
     s_list = []

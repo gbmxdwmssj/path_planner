@@ -180,7 +180,7 @@ if not rospy.core.is_shutdown():
         ytmp *= 0.02
         xtmp = int(xtmp / reso)
         ytmp = int(ytmp / reso)
-        ele = fil_map.data[0].data[(h-ytmp)*w+(h-xtmp)]
+        ele = fil_map.data[0].data[(h-ytmp)*w+(w-xtmp)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
         ele = ele_meter_range[0] + ele * (ele_meter_range[1] - ele_meter_range[0])
         pt_rf += [ele]
@@ -198,7 +198,7 @@ if not rospy.core.is_shutdown():
         ytmp *= 0.02
         xtmp = int(xtmp / reso)
         ytmp = int(ytmp / reso)
-        ele = fil_map.data[0].data[(h-ytmp)*w+(h-xtmp)]
+        ele = fil_map.data[0].data[(h-ytmp)*w+(w-xtmp)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
         ele = ele_meter_range[0] + ele * (ele_meter_range[1] - ele_meter_range[0])
         pt_lf += [ele]
@@ -216,7 +216,7 @@ if not rospy.core.is_shutdown():
         ytmp *= 0.02
         xtmp = int(xtmp / reso)
         ytmp = int(ytmp / reso)
-        ele = fil_map.data[0].data[(h-ytmp)*w+(h-xtmp)]
+        ele = fil_map.data[0].data[(h-ytmp)*w+(w-xtmp)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
         ele = ele_meter_range[0] + ele * (ele_meter_range[1] - ele_meter_range[0])
         pt_lb += [ele]
@@ -234,7 +234,7 @@ if not rospy.core.is_shutdown():
         ytmp *= 0.02
         xtmp = int(xtmp / reso)
         ytmp = int(ytmp / reso)
-        ele = fil_map.data[0].data[(h-ytmp)*w+(h-xtmp)]
+        ele = fil_map.data[0].data[(h-ytmp)*w+(w-xtmp)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
         ele = ele_meter_range[0] + ele * (ele_meter_range[1] - ele_meter_range[0])
         pt_rb += [ele]
@@ -267,7 +267,7 @@ if not rospy.core.is_shutdown():
         y *= 0.02
         x = int(x / reso)
         y = int(y / reso)
-        ele = fil_map.data[0].data[(h-y)*w+(h-x)]
+        ele = fil_map.data[0].data[(h-y)*w+(w-x)]
         ele = (ele - ele_map_value_range[0]) / (ele_map_value_range[1] - ele_map_value_range[0])
 
     with open('/home/kai/ori_roll_pitch_sheet.csv', 'w', newline='') as t_file:
