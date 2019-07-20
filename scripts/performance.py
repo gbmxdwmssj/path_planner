@@ -229,15 +229,15 @@ rospy.Subscriber('/grid_map_filter_demo/filtered_map', GridMap, filCallback)
 
 major_locator=MultipleLocator(0.25)
 
-# while (s_path is None or o_path is None or p_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
-#     print('Wait for paths and map!')
-#     time.sleep(0.5)
-
-
-
-print('Missing the path of horizontal comparison...')
-while (NoTS_path is None or TS_NoSus_path is None or TS_Sus_path is None or fil_map is None) and not rospy.core.is_shutdown():
+while (s_path is None or o_path is None or p_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
+    print('Wait for paths and map!')
     time.sleep(0.5)
+
+
+
+# print('Missing the path of horizontal comparison...')
+# while (NoTS_path is None or TS_NoSus_path is None or TS_Sus_path is None or fil_map is None) and not rospy.core.is_shutdown():
+#     time.sleep(0.5)
 
 
 
@@ -267,8 +267,8 @@ if not rospy.core.is_shutdown():
     # path = o_path
     # path.poses.reverse()
 
-    # path = p_path
-    # path.poses.reverse()
+    path = p_path
+    path.poses.reverse()
 
     # path = NoTS_path
     # path.poses.reverse()
@@ -276,14 +276,20 @@ if not rospy.core.is_shutdown():
     # path = TS_NoSus_path
     # path.poses.reverse()
 
-    path = TS_Sus_path
-    path.poses.reverse()
+    # path = TS_Sus_path
+    # path.poses.reverse()
 
     v_cost = 0.35
     omega_z_cost = 0.1
     a_cost = 0.2
     alpha_z_cost = 0.03
-    runtime = 4.217 # s
+
+    runtime = 2.790 # s
+
+    # min_obs_dis = float('inf')
+    # min_obs_dis = 15.4354
+    # min_obs_dis = 18.0841
+    min_obs_dis = 18.7232
 
     traversability = 0.0
     for i in range(len(path.poses)-2, 0, -1):
@@ -348,8 +354,6 @@ if not rospy.core.is_shutdown():
 
     smooth_cost /= len(path.poses)-2
     print('smooth_cost:', smooth_cost)
-
-    min_obs_dis = float('inf')
 
     t_f = getTf(path)
     print('t_f:', t_f)

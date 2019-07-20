@@ -156,15 +156,15 @@ print('Service /euler_from_quaternion is availiable!')
 
 major_locator=MultipleLocator(0.25)
 
-# while (s_path is None or o_path is None or p_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
-#     print('Wait for paths and map!')
-#     time.sleep(0.5)
-
-
-
-print('Missing the path of horizontal comparison...')
-while (NoTS_path is None or TS_NoSus_path is None or TS_Sus_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
+while (s_path is None or o_path is None or p_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
+    print('Wait for paths and map!')
     time.sleep(0.5)
+
+
+
+# print('Missing the path of horizontal comparison...')
+# while (NoTS_path is None or TS_NoSus_path is None or TS_Sus_path is None or ele_map is None or fil_map is None) and not rospy.core.is_shutdown():
+#     time.sleep(0.5)
 
 
 
@@ -197,14 +197,17 @@ if not rospy.core.is_shutdown():
     # path = o_path
     # path.poses.reverse()
 
+    path = p_path
+    path.poses.reverse()
+
     # path = NoTS_path
     # path.poses.reverse()
 
     # path = TS_NoSus_path
     # path.poses.reverse()
 
-    path = TS_Sus_path
-    path.poses.reverse()
+    # path = TS_Sus_path
+    # path.poses.reverse()
 
     for i in range(len(path.poses)-1, -1, -1):
         ls.append(l)

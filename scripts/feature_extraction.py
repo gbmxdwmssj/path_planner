@@ -165,7 +165,7 @@ def calcFeature(path):
 
     # K = 19
     # Delta_t = t_f / (K - 1)
-    Delta_t = 1.0 # s
+    Delta_t = 3.3 # s
     K = int(t_f / Delta_t) + 1
     print('K:')
     print(K)

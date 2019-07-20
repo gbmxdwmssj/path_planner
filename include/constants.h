@@ -38,7 +38,7 @@ static const bool visualization = false && manual;
 /// A flag for the visualization of 2D nodes (true = on; false = off)
 static const bool visualization2D = false && manual;
 /// A flag to toggle reversing (true = on; false = off)
-static const bool reverse = true;
+static const bool reverse = false; // true;
 /// A flag to toggle the connection of the path via Dubin's shot (true = on; false = off)
 static const bool dubinsShot = false;
 /// A flag to toggle the Dubin's heuristic, this should be false, if reversing is enabled (true = on; false = off)

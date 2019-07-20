@@ -12,12 +12,12 @@
  <!-- dis_wei is alwasys 1.0 and you should adjust the other weight factors -->
  <param name="dis_wei" type="double" value="1.0" />
  <!-- <param name="occ_wei" type="double" value="10.0" /> -->
- <param name="occ_wei" type="double" value="2.0" />
+ <param name="occ_wei" type="double" value="8.2" />
  <param name="dt" type="double" value="0.1" />
  </node>
 
  <node name="tf_broadcaster" pkg="hybrid_astar" type="tf_broadcaster" />
- <node name="occupancy_server" pkg="grid_map_demos" type="occupancy_server.py" args="$(find hybrid_astar)/maps/occ-map-2019-07-18-19:54:41.yaml" />
+ <node name="occupancy_server" pkg="grid_map_demos" type="occupancy_server.py" args="$(find hybrid_astar)/maps/occ-map-2019-07-20-17:33:20.yaml" />
  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hybrid_astar)/launch/config.rviz" />
  <node name="spline" pkg="hybrid_astar" type="spline.py"  output="screen" />
  <node name="euler_from_quaternion" pkg="hybrid_astar" type="euler_from_quaternion.py"  output="screen" />

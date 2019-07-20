@@ -68,7 +68,7 @@ def getKnots(path):
     min_knot_num = 10
     min_dis_step = 5.0 # m
     # max_dis_step = getLength(path) / (min_knot_num - 1) # m
-    max_dis_step = 37.0 # m
+    max_dis_step = 100.0 # m
     min_idx_step = int(min_dis_step / getDisReso(path))
     max_idx_step = int(max_dis_step / getDisReso(path))
     min_idx_step = max(1, min_idx_step)
@@ -81,8 +81,11 @@ def getKnots(path):
     while idx < len(path):
         x_list.append(path[idx].pose.position.x)
         y_list.append(path[idx].pose.position.y)
-        # rand_tmp = random.randint(min_idx_step, max_idx_step)
-        rand_tmp = random.randint(min_idx_step, int(max_idx_step + (min_idx_step-max_idx_step)*(idx/len(path))))
+        if idx > len(path) / 4.0:
+            rand_tmp = random.randint(min_idx_step, max_idx_step)
+            # rand_tmp = random.randint(min_idx_step, int(max_idx_step + (min_idx_step-max_idx_step)*(idx/len(path))))
+        else:
+            rand_tmp = 2
         idx += rand_tmp
     didx = (len(path) - 1) - (idx - rand_tmp)
     if didx < min_idx_step:
@@ -177,6 +180,7 @@ def callback(path):
         if m <= 1:
             continue
         tck, u = interpolate.splprep(knots, k=min(3, m-1))
+        # tck, u = interpolate.splprep(knots, k=min(3, m-1), s=0)
         size = int(getLength(path) / getDisReso(path) + 0.5)
         # print('l_f_l_f_l_f_l_spline_f_l_f_l_f_l_f')
         # print(getLength(path))
