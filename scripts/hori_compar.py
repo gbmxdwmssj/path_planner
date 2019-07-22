@@ -209,7 +209,7 @@ while not rospy.core.is_shutdown():
         smooth_cost = 0.0
 
         rospy.set_param('/hybrid_astar/s_path_name', '/NoTS_sPath')
-        rospy.set_param('/hybrid_astar/occ_thre', 39)
+        rospy.set_param('/hybrid_astar/occ_thre', 20)
         rospy.set_param('/hybrid_astar/cost_mode', 0)
         rospy.set_param('/hybrid_astar/occ_wei', 2.0)
         start_pub.publish(start)
@@ -220,18 +220,18 @@ while not rospy.core.is_shutdown():
         time.sleep(1.0)
 
         rospy.set_param('/hybrid_astar/s_path_name', '/TS_NoSus_sPath')
-        rospy.set_param('/hybrid_astar/occ_thre', 24)
+        rospy.set_param('/hybrid_astar/occ_thre', 20)
         rospy.set_param('/hybrid_astar/cost_mode', 1)
-        rospy.set_param('/hybrid_astar/occ_wei', 6.15)
+        rospy.set_param('/hybrid_astar/occ_wei', 0.7)
         print('---------- TS_NoSus start! ----------')
         os.system('rosrun hybrid_astar hybrid_astar')
         print('TS_NoSus stop!')
         time.sleep(1.0)
 
         rospy.set_param('/hybrid_astar/s_path_name', '/TS_Sus_sPath')
-        rospy.set_param('/hybrid_astar/occ_thre', 35)
+        rospy.set_param('/hybrid_astar/occ_thre', 20)
         rospy.set_param('/hybrid_astar/cost_mode', 2)
-        rospy.set_param('/hybrid_astar/occ_wei', 3.5)
+        rospy.set_param('/hybrid_astar/occ_wei', 5.7)
         print('---------- TS_Sus start! ----------')
         os.system('rosrun hybrid_astar hybrid_astar')
         print('TS_Sus stop!')

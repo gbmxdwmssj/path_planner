@@ -68,7 +68,7 @@ def getKnots(path):
     min_knot_num = 10
     min_dis_step = 5.0 # m
     # max_dis_step = getLength(path) / (min_knot_num - 1) # m
-    max_dis_step = 100.0 # m
+    max_dis_step = 40.0 # m
     min_idx_step = int(min_dis_step / getDisReso(path))
     max_idx_step = int(max_dis_step / getDisReso(path))
     min_idx_step = max(1, min_idx_step)
@@ -82,10 +82,10 @@ def getKnots(path):
         x_list.append(path[idx].pose.position.x)
         y_list.append(path[idx].pose.position.y)
         if idx > len(path) / 4.0:
-            rand_tmp = random.randint(min_idx_step, max_idx_step)
-            # rand_tmp = random.randint(min_idx_step, int(max_idx_step + (min_idx_step-max_idx_step)*(idx/len(path))))
+            # rand_tmp = random.randint(min_idx_step, max_idx_step)
+            rand_tmp = random.randint(min_idx_step, int(max_idx_step + (min_idx_step-max_idx_step)*(idx/len(path))))
         else:
-            rand_tmp = 2
+            rand_tmp = 1
         idx += rand_tmp
     didx = (len(path) - 1) - (idx - rand_tmp)
     if didx < min_idx_step:
